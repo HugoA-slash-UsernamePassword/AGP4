@@ -27,6 +27,9 @@ public:
 
 	float GScore;
 	float HScore;
+	UPROPERTY(EditAnywhere) bool bIsMainNode;
+	UPROPERTY(VisibleAnywhere)
+	bool bIsOccupied;
 	ANavigationNode* CameFrom;
 
 	// Called every frame

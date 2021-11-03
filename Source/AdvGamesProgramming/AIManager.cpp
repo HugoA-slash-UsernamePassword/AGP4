@@ -19,10 +19,9 @@ AAIManager::AAIManager()
 void AAIManager::BeginPlay()
 {
 	Super::BeginPlay();
-	
-
 }
-void AAIManager::BeginAI() 
+
+void AAIManager::BeginAI()
 {
 	if (AllNodes.Num() == 0)
 	{
@@ -123,6 +122,10 @@ void AAIManager::PopulateNodes()
 	for (TActorIterator<ANavigationNode> It(GetWorld()); It; ++It)
 	{
 		AllNodes.Add(*It);
+		if (It->bIsMainNode)
+		{
+			MainNodes.Add(*It);
+		}
 	}
 }
 
@@ -133,11 +136,63 @@ void AAIManager::CreateAgents()
 		for (int32 i = 0; i < NumAI; i++)
 		{
 			// Get a random node index
-			int32 NodeIndex = FMath::RandRange(0, AllNodes.Num() - 1);
-			AEnemyCharacter* SpawnedEnemy = GetWorld()->SpawnActor<AEnemyCharacter>(AgentToSpawn, AllNodes[NodeIndex]->GetActorLocation(), AllNodes[NodeIndex]->GetActorRotation());
-			SpawnedEnemy->Manager = this;
-			SpawnedEnemy->CurrentNode = AllNodes[NodeIndex];
+			CreateSingleAI();
 		}
+
+		for (int32 i = 0; i < NumAISquad; i++)
+		{
+			CreateSquad(FMath::RandRange(AISquadMinSize, AISquadMaxSize));
+		}
+	}
+}
+
+void AAIManager::CreateSingleAI()
+{
+	int32 NodeIndex = FMath::RandRange(0, AllNodes.Num() - 1);
+	while (AllNodes[NodeIndex]->bIsOccupied)
+	{
+		NodeIndex = FMath::RandRange(0, AllNodes.Num() - 1);
+	}
+	AEnemyCharacter* SpawnedEnemy = GetWorld()->SpawnActor<AEnemyCharacter>(AgentToSpawn, AllNodes[NodeIndex]->GetActorLocation(), AllNodes[NodeIndex]->GetActorRotation());
+	SpawnedEnemy->Manager = this;
+	SpawnedEnemy->CurrentNode = AllNodes[NodeIndex];
+	AllNodes[NodeIndex]->bIsOccupied = true;
+}
+
+void AAIManager::CreateSquad(int32 SquadMemberCount)
+{
+
+	if (MainNodes.Num() > 0)
+	{
+		int32 NodeIndex = FMath::RandRange(0, MainNodes.Num() - 1);
+		int32 n = 5;
+		while (MainNodes[NodeIndex]->bIsOccupied && n > 0)
+		{
+			NodeIndex = FMath::RandRange(0, MainNodes.Num() - 1);
+			n--;
+		}
+		ANavigationNode* MainNode = MainNodes[NodeIndex];
+		ANavigationNode* ChosenNode = MainNode;
+		AEnemyCharacter* LastEnemy = nullptr;
+
+		for (int i = 0; i < SquadMemberCount; i++)
+		{
+			n = 5;
+			while (ChosenNode->bIsOccupied && n > 1)
+			{
+				ChosenNode = ChosenNode->ConnectedNodes[FMath::RandRange(0, ChosenNode->ConnectedNodes.Num() - 1)];
+				n--;
+			}
+
+			AEnemyCharacter* SpawnedEnemy = GetWorld()->SpawnActor<AEnemyCharacter>(AgentToSpawn, ChosenNode->GetActorLocation(), ChosenNode->GetActorRotation());
+			SpawnedEnemy->Manager = this;
+			SpawnedEnemy->CurrentNode = ChosenNode;
+			SpawnedEnemy->Superior = LastEnemy;
+			if (LastEnemy) LastEnemy->Inferior = SpawnedEnemy;
+			ChosenNode->bIsOccupied = true;
+			LastEnemy = SpawnedEnemy;
+		}
+
 	}
 }
 
@@ -146,7 +201,7 @@ ANavigationNode* AAIManager::FindNearestNode(const FVector& Location)
 	ANavigationNode* NearestNode = nullptr;
 	float NearestDistance = TNumericLimits<float>::Max();
 	//Loop through the nodes and find the nearest one in distance
-	for (ANavigationNode* CurrentNode : AllNodes)
+	for (ANavigationNode* CurrentNode : MainNodes)
 	{
 		float CurrentNodeDistance = FVector::Distance(Location, CurrentNode->GetActorLocation());
 		if (CurrentNodeDistance < NearestDistance)
@@ -155,16 +210,16 @@ ANavigationNode* AAIManager::FindNearestNode(const FVector& Location)
 			NearestNode = CurrentNode;
 		}
 	}
-	UE_LOG(LogTemp, Error, TEXT("Nearest Node: %s"), *NearestNode->GetName())
-		return NearestNode;
+	//UE_LOG(LogTemp, Error, TEXT("Nearest Node: %s"), *NearestNode->GetName());
+	return NearestNode;
 }
 
 ANavigationNode* AAIManager::FindFurthestNode(const FVector& Location)
 {
 	ANavigationNode* FurthestNode = nullptr;
-	float FurthestDistance = 0.0f;
+	float FurthestDistance = -1;
 	//Loop through the nodes and find the nearest one in distance
-	for (ANavigationNode* CurrentNode : AllNodes)
+	for (ANavigationNode* CurrentNode : MainNodes)
 	{
 		float CurrentNodeDistance = FVector::Distance(Location, CurrentNode->GetActorLocation());
 		if (CurrentNodeDistance > FurthestDistance)
@@ -174,7 +229,7 @@ ANavigationNode* AAIManager::FindFurthestNode(const FVector& Location)
 		}
 	}
 
-	UE_LOG(LogTemp, Error, TEXT("Furthest Node: %s"), *FurthestNode->GetName())
+	//UE_LOG(LogTemp, Error, TEXT("Furthest Node: %s"), *FurthestNode->GetName())
 		return FurthestNode;
 }
 

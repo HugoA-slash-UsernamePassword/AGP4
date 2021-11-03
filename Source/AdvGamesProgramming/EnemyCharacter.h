@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Perception/AIPerceptionTypes.h"
+#include "HealthComponent.h"
 #include "EnemyCharacter.generated.h"
 
 UENUM()
@@ -23,6 +24,7 @@ class ADVGAMESPROGRAMMING_API AEnemyCharacter : public ACharacter
 public:
 	// Sets default values for this character's properties
 	AEnemyCharacter();
+	AEnemyCharacter(AEnemyCharacter* SuperiorAI);
 
 protected:
 	// Called when the game starts or when spawned
@@ -31,13 +33,27 @@ protected:
 public:	
 
 	TArray <class ANavigationNode* > Path;
+
+	UPROPERTY(VisibleAnywhere)
 	ANavigationNode* CurrentNode;
 	class AAIManager* Manager;
-
-	UPROPERTY(EditAnywhere, meta=(UIMin="10.0", UIMax="1000.0", ClampMin="10.0", ClampMax="1000.0"))
 	float PathfindingNodeAccuracy;
 
+	UPROPERTY(EditAnywhere, meta = (UIMin = "10.0", UIMax = "1000.0", ClampMin = "10.0", ClampMax = "1000.0"))
+	float PathfindingEvasionAccuracy;
+
+	UPROPERTY(EditAnywhere, meta = (UIMin = "10.0", UIMax = "1000.0", ClampMin = "10.0", ClampMax = "1000.0"))
+	float PathfindingDestinationAccuracy;
+
+
 	class UHealthComponent* HealthComponent;
+
+	AEnemyCharacter* Superior;
+	AEnemyCharacter* Inferior;
+	float TravelTimer;
+
+	UPROPERTY(EditAnywhere, Category = "AI")
+	float MaxTimeBeforeReroute;
 
 	UPROPERTY(VisibleAnywhere, Category = "AI")
 	AgentState CurrentAgentState;
