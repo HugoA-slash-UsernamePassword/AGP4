@@ -19,6 +19,7 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+
 public:	
 
 	UPROPERTY(EditAnywhere, Category = "ConnectedNodes")
@@ -36,5 +37,6 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	float FScore();
+	void DrawDebug();
 
 };

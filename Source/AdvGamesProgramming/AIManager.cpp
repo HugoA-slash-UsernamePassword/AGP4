@@ -126,6 +126,7 @@ void AAIManager::PopulateNodes()
 		{
 			MainNodes.Add(*It);
 		}
+		It->DrawDebug();
 	}
 }
 

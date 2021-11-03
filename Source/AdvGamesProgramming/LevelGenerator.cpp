@@ -76,7 +76,9 @@ void ALevelGenerator::SpawnRoom(TArray<TSubclassOf<ALevelData>> palette)
 	TArray<ANavigationNode*> NavPointsNode; //Navigation nodes to be spawned
 	for (int32 i = NavPoints.Num() - 1; i >= 0; i--)
 	{
-		NavPointsNode.Add(GetWorld()->SpawnActor<ANavigationNode>(NodeToSpawn, NavPoints[i]->GetComponentTransform())); //Create nodes based on NavPoints.
+		ANavigationNode* _node = GetWorld()->SpawnActor<ANavigationNode>(NodeToSpawn, NavPoints[i]->GetComponentTransform());
+		NavPointsNode.Add(_node); //Create nodes based on NavPoints.
+		_node->bIsMainNode = true;
 	}
 	for (size_t i = 0; i < NewLevel->connections.Num(); i++)
 	{
