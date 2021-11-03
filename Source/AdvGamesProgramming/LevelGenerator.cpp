@@ -32,14 +32,18 @@ void ALevelGenerator::SpawnRoom(TArray<TSubclassOf<ALevelData>> palette)
 	//DrawDebugPoint(GetWorld(), SpawnPoint.GetLocation(), 10.0f, FColor::Green, true); //Debug spawn point
 	TSubclassOf<ALevelData> LevelToSpawn = palette[FMath::RandRange(0, palette.Num() - 1)]; //Random level from selected palette
 	ALevelData* NewLevel = GetWorld()->SpawnActor<ALevelData>(LevelToSpawn, SpawnPoint); //Spawn level
+
 	NewLevel->GetComponents<USceneComponent>(nodes); //Get components
+
 	TArray<USceneComponent*> NavPoints; //Location to put navigation nodes
 	for (int32 i = nodes.Num() - 1; i >= 0; i--)
 	{
 		if (nodes[i]->ComponentHasTag("Nav")) NavPoints.Add(nodes[i]);
 		if (!nodes[i]->ComponentHasTag("Node"))	nodes.RemoveAt(i); //Remove from list if it is not a level node (doorway)
 	}
+
 	if (nodes.Num() == 0) return; //Aborts the function if we run out of level nodes.
+
 	int32 chosenDoorInt = FMath::RandRange(0, nodes.Num() - 1); //Random node from available nodes
 	USceneComponent* chosenDoor = nodes[chosenDoorInt];
 	nodes.RemoveAt(chosenDoorInt); //Remove from array so that we don't choose the same node for entry and exit.

@@ -6,7 +6,6 @@
 #include "NavigationNode.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Perception/AIPerceptionComponent.h"
-#include "HealthComponent.h"
 
 // Sets default values
 AEnemyCharacter::AEnemyCharacter()
@@ -15,7 +14,23 @@ AEnemyCharacter::AEnemyCharacter()
 	PrimaryActorTick.bCanEverTick = true;
 
 	CurrentAgentState = AgentState::PATROL;
-	PathfindingNodeAccuracy = 100.0f;
+	PathfindingDestinationAccuracy = 100.0f;
+	PathfindingNodeAccuracy = PathfindingDestinationAccuracy;
+
+	Superior = nullptr;
+	Inferior = nullptr;
+}
+
+AEnemyCharacter::AEnemyCharacter(AEnemyCharacter* SuperiorAI)
+{
+	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	PrimaryActorTick.bCanEverTick = true;
+
+	CurrentAgentState = AgentState::PATROL;
+	PathfindingDestinationAccuracy = 100.0f;
+	PathfindingNodeAccuracy = PathfindingDestinationAccuracy;
+
+	Superior = SuperiorAI;
 }
 
 // Called when the game starts or when spawned
@@ -36,12 +51,32 @@ void AEnemyCharacter::BeginPlay()
 	DetectedActor = nullptr;
 	bCanSeeActor = false;
 
+	PathfindingNodeAccuracy = PathfindingDestinationAccuracy;
+
 }
 
 // Called every frame
 void AEnemyCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	if (Superior && HealthComponent->CurrentHealth > 40.0f)
+	{
+		if (bCanSeeActor && !Superior->bCanSeeActor)
+		{
+			Superior->DetectedActor = DetectedActor;
+			Superior->Path.Empty();
+			Superior->AgentEngage();
+			Superior->CurrentAgentState = AgentState::ENGAGE;
+
+			Path.Empty();
+			AgentEngage();
+
+			UE_LOG(LogTemp, Warning, TEXT("PLAYER SPOTTED"));
+		}
+
+		CurrentAgentState = Superior->CurrentAgentState;
+		DetectedActor = Superior->DetectedActor;
+	}
 
 	if (CurrentAgentState == AgentState::PATROL)
 	{
@@ -50,7 +85,7 @@ void AEnemyCharacter::Tick(float DeltaTime)
 		{
 			CurrentAgentState = AgentState::ENGAGE;
 			Path.Empty();
-		} 
+		}
 		else if (bCanSeeActor && HealthComponent->HealthPercentageRemaining() < 40.0f)
 		{
 			CurrentAgentState = AgentState::EVADE;
@@ -84,6 +119,16 @@ void AEnemyCharacter::Tick(float DeltaTime)
 		}
 	}
 
+
+	if (HealthComponent->CurrentHealth == 0)
+	{
+		if (Inferior)Inferior->Superior = Superior;
+		if (Superior)Superior->Inferior = Inferior;
+		Destroy();
+	}
+
+	if (TravelTimer > 0) TravelTimer -= DeltaTime;
+
 	MoveAlongPath();
 }
 
@@ -98,9 +143,15 @@ void AEnemyCharacter::AgentPatrol()
 {
 	if (Path.Num() == 0)
 	{
-		if (Manager)
+		if (Superior && Manager)
 		{
-			Path = Manager->GeneratePath(CurrentNode, Manager->AllNodes[FMath::RandRange(0, Manager->AllNodes.Num() - 1)]);
+			CurrentNode->bIsOccupied = false;
+			Path = Manager->GeneratePath(CurrentNode, Superior->CurrentNode);
+		}
+		else if (Manager)
+		{
+			CurrentNode->bIsOccupied = false;
+			Path = Manager->GeneratePath(CurrentNode, Manager->MainNodes[FMath::RandRange(0, Manager->MainNodes.Num() - 1)]);
 		}
 	}
 }
@@ -114,8 +165,15 @@ void AEnemyCharacter::AgentEngage()
 	}
 	if (Path.Num() == 0 && DetectedActor)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("ENGAGING PLAYER"));
+
 		ANavigationNode* NearestNode = Manager->FindNearestNode(DetectedActor->GetActorLocation());
-		Path = Manager->GeneratePath(CurrentNode, NearestNode);
+		if (NearestNode != CurrentNode && !(CurrentNode->ConnectedNodes.Contains(NearestNode) && NearestNode->bIsOccupied))
+		{
+			CurrentNode->bIsOccupied = false;
+			Path = Manager->GeneratePath(CurrentNode, NearestNode);
+		}
+		
 	}
 }
 
@@ -128,23 +186,33 @@ void AEnemyCharacter::AgentEvade()
 	}
 	if (Path.Num() == 0 && DetectedActor)
 	{
+
 		ANavigationNode* FurthestNode = Manager->FindFurthestNode(DetectedActor->GetActorLocation());
-		Path = Manager->GeneratePath(CurrentNode, FurthestNode);
+
+		if (FurthestNode != CurrentNode && !(CurrentNode->ConnectedNodes.Contains(FurthestNode) && FurthestNode->bIsOccupied))
+		{
+			CurrentNode->bIsOccupied = false;
+			Path = Manager->GeneratePath(CurrentNode, FurthestNode);
+		}
 	}
 }
 
 void AEnemyCharacter::SensePlayer(AActor* ActorSensed, FAIStimulus Stimulus)
 {
-	if (Stimulus.WasSuccessfullySensed())
+	if (ActorSensed->ActorHasTag(FName(TEXT("Player"))))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Player Detected"))
-		DetectedActor = ActorSensed;
-		bCanSeeActor = true;
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Player Lost"))
-		bCanSeeActor = false;
+		if (Stimulus.WasSuccessfullySensed())
+		{
+
+			UE_LOG(LogTemp, Warning, TEXT("Player Detected"))
+			DetectedActor = ActorSensed;
+			bCanSeeActor = true;
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Player Lost"))
+			bCanSeeActor = false;
+		}
 	}
 }
 
@@ -153,11 +221,51 @@ void AEnemyCharacter::MoveAlongPath()
 	if ((GetActorLocation() - CurrentNode->GetActorLocation()).IsNearlyZero(PathfindingNodeAccuracy)
 		&& Path.Num() > 0)
 	{
+		TravelTimer = MaxTimeBeforeReroute;
+		ANavigationNode* LastNode = CurrentNode;
 		CurrentNode = Path.Pop();
+		ANavigationNode* NextNode = CurrentNode;
+
+		if (Path.Num() == 0 && CurrentNode->bIsOccupied)
+		{
+			int8 i = 5;
+			while (NextNode->bIsOccupied && i >= 5)
+			{
+				NextNode = NextNode->ConnectedNodes[FMath::RandRange(0, NextNode->ConnectedNodes.Num() - 1)];
+				i--;
+			}
+
+			Path.Empty();
+			Path = Manager->GeneratePath(LastNode, NextNode);
+			CurrentNode = LastNode;
+			PathfindingNodeAccuracy = PathfindingEvasionAccuracy;
+
+			UE_LOG(LogTemp, Error, TEXT("%s Node: %s is Occupied. Moving to %s"), *GetName(), *CurrentNode->GetName(), *NextNode->GetName());
+			
+		}
+
+		if (Path.Num() == 0)
+		{
+			CurrentNode->bIsOccupied = true;
+			UE_LOG(LogTemp, Error, TEXT("%s Node: %s has been Occupied"), *GetName(), *CurrentNode->GetName());
+			PathfindingNodeAccuracy = PathfindingDestinationAccuracy;
+		}
+		
 	}
 	else if (!(GetActorLocation() - CurrentNode->GetActorLocation()).IsNearlyZero(PathfindingNodeAccuracy))
 	{
 		AddMovementInput(CurrentNode->GetActorLocation() - GetActorLocation());
+		if (TravelTimer < 0)
+		{
+			Path.Insert(CurrentNode, 0);
+			CurrentNode = Manager->FindNearestNode(GetActorLocation());
+		}
 	}
+
+	/*if (Path.Num() == 1 && CurrentNode->bIsOccupied)
+	{
+		Path.Add(CurrentNode->ConnectedNodes[FMath::RandRange(0, CurrentNode->ConnectedNodes.Num() - 1)]);
+		CurrentNode = Path.Pop();
+	}*/
 }
 

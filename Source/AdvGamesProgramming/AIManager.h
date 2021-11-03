@@ -14,32 +14,42 @@ class ADVGAMESPROGRAMMING_API AAIManager : public AActor
 public:	
 	// Sets default values for this actor's properties
 	AAIManager();
+	void BeginAI();
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+
 public:	
 	UPROPERTY(EditAnywhere, Category = "AI Properties")
 	int32 NumAI;
+	UPROPERTY(EditAnywhere, Category = "AI Properties")
+	int32 NumAISquad;
+	UPROPERTY(EditAnywhere, Category = "AI Properties")
+	int32 AISquadMaxSize;
+	UPROPERTY(EditAnywhere, Category = "AI Properties")
+	int32 AISquadMinSize;
 	UPROPERTY(VisibleAnywhere, Category = "Navigation Nodes")
 	TArray<class ANavigationNode*> AllNodes;
+	UPROPERTY(VisibleAnywhere, Category = "Navigation Nodes")
+	TArray<class ANavigationNode*> MainNodes;
 	UPROPERTY(VisibleAnywhere, Category = "Agents")
 	TArray<class AEnemyCharacter*> AllAgents;
 	UPROPERTY(EditAnywhere, Category = "Agents")
 	TSubclassOf<AEnemyCharacter> AgentToSpawn;
 
 	UPROPERTY(EditAnywhere)
-	float AllowedAngle = 0.4f;
+	float AllowedAngle;
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	void BeginAI();
-
 	TArray<ANavigationNode*> GeneratePath(ANavigationNode* StartNode, ANavigationNode* EndNode);
 	void PopulateNodes();
 	void CreateAgents();
+	void CreateSquad(int32 SquadMemberCount);
+	void CreateSingleAI();
 
 	/**
 	Finds the nearest navigation node from the given location.
