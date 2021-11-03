@@ -2,10 +2,12 @@
 
 #pragma once
 
+#include "Camera/CameraComponent.h"
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "Camera/CameraComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "PlayerCharacter.generated.h"
+
 
 UCLASS()
 class ADVGAMESPROGRAMMING_API APlayerCharacter : public ACharacter
@@ -20,11 +22,19 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	UCameraComponent* Camera;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bCanDoubleJump;
+	float ForwardAxis;
+	float StrafeAxis;
+
 public:	
 
 	UPROPERTY(EditAnywhere)
 	float LookSensitivity;
-	UPROPERTY(EditInstanceOnly)
+
+	UPROPERTY(EditAnywhere)
 	float SprintMultiplier;
 
 	// Called every frame
@@ -37,15 +47,25 @@ public:
 	void Strafe(float Value);
 	void LookUp(float Value);
 	void Turn(float Value);
+
 	void SprintStart();
 	void SprintEnd();
-	void Reload();
 
-	UFUNCTION(BlueprintImplementableEvent)
-	void BlueprintReload();
+	void StartCrouch();
+	void EndCrouch();
+	virtual void OnEndCrouch(
+		float HalfHeightAdjust,
+		float ScaledHalfHeightAdjust
+	) override;
+	virtual void OnStartCrouch
+	(
+		float HalfHeightAdjust,
+		float ScaledHalfHeightAdjust
+	) override;
+	virtual void Landed
+	(
+		const FHitResult& Hit
+	) override;
+	virtual void Jump() override;
 
-private:
-
-	UCameraComponent* Camera;
-	class UFirstPersonAnimInstance* AnimInstance;
 };
