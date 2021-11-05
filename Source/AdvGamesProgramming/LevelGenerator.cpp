@@ -19,31 +19,30 @@ ALevelGenerator::ALevelGenerator()
 void ALevelGenerator::BeginPlay()
 {
 	Super::BeginPlay();
-	while (CurrentNodes < MaxNodes)
+	bSpawnedAI = false;
+
+	CheckSpawnRoom();
+	/*while (CurrentNodes < MaxNodes)
 	{
 		CurrentNodes++;
 		SpawnRoom(LevelPalette);
 		if(bSpawnHallways) SpawnRoom(JoinPalette);
 	}
-	AIManager->BeginAI();
+	AIManager->BeginAI();*/
 }
 void ALevelGenerator::SpawnRoom(TArray<TSubclassOf<ALevelData>> palette)
 {
 	//DrawDebugPoint(GetWorld(), SpawnPoint.GetLocation(), 10.0f, FColor::Green, true); //Debug spawn point
 	TSubclassOf<ALevelData> LevelToSpawn = palette[FMath::RandRange(0, palette.Num() - 1)]; //Random level from selected palette
 	ALevelData* NewLevel = GetWorld()->SpawnActor<ALevelData>(LevelToSpawn, SpawnPoint); //Spawn level
-
 	NewLevel->GetComponents<USceneComponent>(nodes); //Get components
-
 	TArray<USceneComponent*> NavPoints; //Location to put navigation nodes
 	for (int32 i = nodes.Num() - 1; i >= 0; i--)
 	{
 		if (nodes[i]->ComponentHasTag("Nav")) NavPoints.Add(nodes[i]);
 		if (!nodes[i]->ComponentHasTag("Node"))	nodes.RemoveAt(i); //Remove from list if it is not a level node (doorway)
 	}
-
 	if (nodes.Num() == 0) return; //Aborts the function if we run out of level nodes.
-
 	int32 chosenDoorInt = FMath::RandRange(0, nodes.Num() - 1); //Random node from available nodes
 	USceneComponent* chosenDoor = nodes[chosenDoorInt];
 	nodes.RemoveAt(chosenDoorInt); //Remove from array so that we don't choose the same node for entry and exit.
@@ -55,7 +54,6 @@ void ALevelGenerator::SpawnRoom(TArray<TSubclassOf<ALevelData>> palette)
 	NewLevel->AddActorWorldRotation(SpawnPoint.GetRotation()); //Add base rotation
 	NewLevel->SetActorLocation(chosenDoor->GetComponentLocation()); //Move based on door location. This only works if the rooms are symmetrical.
 	NewLevel->AddActorWorldRotation(FQuat(FVector::UpVector, PI)); //rotate by 180 degrees
-	
 	float LevelHeight = chosenDoor->GetRelativeLocation().Z; 
 	NewLevel->AddActorWorldOffset(FVector(0, 0, -2 * LevelHeight)); //invert the door location change
 	//UE_LOG(LogTemp, Warning, TEXT("Room height: %f"), LevelHeight) //Debug door height.
@@ -76,7 +74,9 @@ void ALevelGenerator::SpawnRoom(TArray<TSubclassOf<ALevelData>> palette)
 	TArray<ANavigationNode*> NavPointsNode; //Navigation nodes to be spawned
 	for (int32 i = NavPoints.Num() - 1; i >= 0; i--)
 	{
-		NavPointsNode.Add(GetWorld()->SpawnActor<ANavigationNode>(NodeToSpawn, NavPoints[i]->GetComponentTransform())); //Create nodes based on NavPoints.
+		ANavigationNode* _node = GetWorld()->SpawnActor<ANavigationNode>(NodeToSpawn, NavPoints[i]->GetComponentTransform());
+		NavPointsNode.Add(_node); //Create nodes based on NavPoints.
+		_node->bIsMainNode = true;
 	}
 	for (size_t i = 0; i < NewLevel->connections.Num(); i++)
 	{
@@ -99,4 +99,21 @@ void ALevelGenerator::SpawnRoom(TArray<TSubclassOf<ALevelData>> palette)
 void ALevelGenerator::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	CheckSpawnRoom();
+}
+
+void ALevelGenerator::CheckSpawnRoom()
+{
+	if (CurrentNodes < MaxNodes)
+	{
+		CurrentNodes++;
+		SpawnRoom(LevelPalette);
+		if (bSpawnHallways) SpawnRoom(JoinPalette);
+	}
+	else if (!bSpawnedAI)
+	{
+		AIManager->BeginAI();
+		bSpawnedAI = true;
+	}
 }
