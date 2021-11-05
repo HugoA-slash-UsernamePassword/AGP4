@@ -31,11 +31,13 @@ protected:
 	virtual void BeginPlay() override;
 
 public:	
-
+	UPROPERTY(VisibleAnywhere)
 	TArray <class ANavigationNode* > Path;
 
 	UPROPERTY(VisibleAnywhere)
 	ANavigationNode* CurrentNode;
+	UPROPERTY(VisibleAnywhere)
+	ANavigationNode* LastNode;
 	class AAIManager* Manager;
 	float PathfindingNodeAccuracy;
 
@@ -50,6 +52,7 @@ public:
 
 	AEnemyCharacter* Superior;
 	AEnemyCharacter* Inferior;
+	UPROPERTY(VisibleAnywhere)
 	float TravelTimer;
 
 	UPROPERTY(EditAnywhere, Category = "AI")
