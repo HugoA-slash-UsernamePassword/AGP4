@@ -24,8 +24,10 @@ protected:
 public:	
 	UPROPERTY(EditAnywhere, Category = "AI Properties")
 	int32 NumAI;
+	int32 NumAISpawned;
 	UPROPERTY(EditAnywhere, Category = "AI Properties")
 	int32 NumAISquad;
+	int32 NumAISquadSpawned;
 	UPROPERTY(EditAnywhere, Category = "AI Properties")
 	int32 AISquadMaxSize;
 	UPROPERTY(EditAnywhere, Category = "AI Properties")
@@ -42,6 +44,7 @@ public:
 	UPROPERTY(EditAnywhere)
 	float AllowedAngle;
 
+	bool bAIStarted;
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 

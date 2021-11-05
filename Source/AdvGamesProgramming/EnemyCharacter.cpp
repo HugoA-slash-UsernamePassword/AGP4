@@ -50,6 +50,7 @@ void AEnemyCharacter::BeginPlay()
 
 	DetectedActor = nullptr;
 	bCanSeeActor = false;
+	TravelTimer = MaxTimeBeforeReroute;
 
 	PathfindingNodeAccuracy = PathfindingDestinationAccuracy;
 
@@ -129,6 +130,14 @@ void AEnemyCharacter::Tick(float DeltaTime)
 
 	if (TravelTimer > 0) TravelTimer -= DeltaTime;
 
+	if (LastNode)
+	{
+		if ((GetActorLocation() - LastNode->GetActorLocation()).SizeSquared() > 100)
+		{
+			LastNode->bIsOccupied = false;
+		}
+	}
+
 	MoveAlongPath();
 }
 
@@ -145,12 +154,10 @@ void AEnemyCharacter::AgentPatrol()
 	{
 		if (Superior && Manager)
 		{
-			CurrentNode->bIsOccupied = false;
 			Path = Manager->GeneratePath(CurrentNode, Superior->CurrentNode);
 		}
 		else if (Manager)
 		{
-			CurrentNode->bIsOccupied = false;
 			Path = Manager->GeneratePath(CurrentNode, Manager->MainNodes[FMath::RandRange(0, Manager->MainNodes.Num() - 1)]);
 		}
 	}
@@ -170,7 +177,6 @@ void AEnemyCharacter::AgentEngage()
 		ANavigationNode* NearestNode = Manager->FindNearestNode(DetectedActor->GetActorLocation());
 		if (NearestNode != CurrentNode && !(CurrentNode->ConnectedNodes.Contains(NearestNode) && NearestNode->bIsOccupied))
 		{
-			CurrentNode->bIsOccupied = false;
 			Path = Manager->GeneratePath(CurrentNode, NearestNode);
 		}
 		
@@ -191,7 +197,6 @@ void AEnemyCharacter::AgentEvade()
 
 		if (FurthestNode != CurrentNode && !(CurrentNode->ConnectedNodes.Contains(FurthestNode) && FurthestNode->bIsOccupied))
 		{
-			CurrentNode->bIsOccupied = false;
 			Path = Manager->GeneratePath(CurrentNode, FurthestNode);
 		}
 	}
@@ -222,7 +227,7 @@ void AEnemyCharacter::MoveAlongPath()
 		&& Path.Num() > 0)
 	{
 		TravelTimer = MaxTimeBeforeReroute;
-		ANavigationNode* LastNode = CurrentNode;
+		LastNode = CurrentNode;
 		CurrentNode = Path.Pop();
 		ANavigationNode* NextNode = CurrentNode;
 
@@ -255,10 +260,18 @@ void AEnemyCharacter::MoveAlongPath()
 	else if (!(GetActorLocation() - CurrentNode->GetActorLocation()).IsNearlyZero(PathfindingNodeAccuracy))
 	{
 		AddMovementInput(CurrentNode->GetActorLocation() - GetActorLocation());
-		if (TravelTimer < 0)
+		if (TravelTimer <= 0)
 		{
 			Path.Insert(CurrentNode, 0);
-			CurrentNode = Manager->FindNearestNode(GetActorLocation());
+			if (LastNode)
+			{
+				CurrentNode = LastNode;
+			}
+			else
+			{
+				CurrentNode = Manager->FindNearestNode(GetActorLocation());
+			}
+			
 		}
 	}
 
