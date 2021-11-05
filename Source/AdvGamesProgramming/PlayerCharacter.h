@@ -68,4 +68,9 @@ public:
 	) override;
 	virtual void Jump() override;
 
+	void Reload();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void BlueprintReload();
+
 };

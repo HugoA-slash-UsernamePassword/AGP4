@@ -50,6 +50,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAction(TEXT("Crouch"), EInputEvent::IE_Released, this, &APlayerCharacter::EndCrouch);
 	PlayerInputComponent->BindAction(TEXT("Sprint"), EInputEvent::IE_Pressed, this, &APlayerCharacter::SprintStart);
 	PlayerInputComponent->BindAction(TEXT("Sprint"), EInputEvent::IE_Released, this, &APlayerCharacter::SprintEnd);
+	PlayerInputComponent->BindAction(TEXT("Reload"), EInputEvent::IE_Pressed, this, &APlayerCharacter::Reload);
 }
 
 void APlayerCharacter::MoveForward(float Value) 
@@ -130,5 +131,10 @@ void APlayerCharacter::Jump() {
 		ACharacter::LaunchCharacter(FVector(0, 0, 500), false, true);
 		bCanDoubleJump = false;
 	}
+}
+
+void APlayerCharacter::Reload()
+{
+	BlueprintReload();
 }
 
