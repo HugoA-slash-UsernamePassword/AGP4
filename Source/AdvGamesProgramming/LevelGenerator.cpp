@@ -10,7 +10,7 @@
 // Sets default values
 ALevelGenerator::ALevelGenerator()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	MaxNodes = 2;
 }
@@ -37,15 +37,16 @@ void ALevelGenerator::SpawnRoom(TArray<TSubclassOf<ALevelData>> palette)
 	ALevelData* NewLevel = GetWorld()->SpawnActor<ALevelData>(LevelToSpawn, SpawnPoint); //Spawn level
 	NewLevel->GetComponents<USceneComponent>(nodes); //Get components
 	TArray<USceneComponent*> NavPoints; //Location to put navigation nodes
+	//nodes = NewLevel->GetComponentsByTag(USceneComponent::StaticClass(), FName(""));
 	for (int32 i = nodes.Num() - 1; i >= 0; i--)
 	{
 		if (nodes[i]->ComponentHasTag("Nav")) NavPoints.Add(nodes[i]);
 		if (!nodes[i]->ComponentHasTag("Node"))	nodes.RemoveAt(i); //Remove from list if it is not a level node (doorway)
 	}
 	if (nodes.Num() == 0) return; //Aborts the function if we run out of level nodes.
-	int32 chosenDoorInt = FMath::RandRange(0, nodes.Num() - 1); //Random node from available nodes
+	//int32 chosenDoorInt = FMath::RandRange(0, nodes.Num() - 1); //Random node from available nodes
+	int32 chosenDoorInt = 0;
 	USceneComponent* chosenDoor = nodes[chosenDoorInt];
-	nodes.RemoveAt(chosenDoorInt); //Remove from array so that we don't choose the same node for entry and exit.
 	UStaticMeshComponent* _doorway = Cast<UStaticMeshComponent>(chosenDoor->GetChildComponent(0));
 	_doorway->SetStaticMesh(doorway); //Set doorway mesh
 
@@ -54,17 +55,24 @@ void ALevelGenerator::SpawnRoom(TArray<TSubclassOf<ALevelData>> palette)
 	NewLevel->AddActorWorldRotation(SpawnPoint.GetRotation()); //Add base rotation
 	NewLevel->SetActorLocation(chosenDoor->GetComponentLocation()); //Move based on door location. This only works if the rooms are symmetrical.
 	NewLevel->AddActorWorldRotation(FQuat(FVector::UpVector, PI)); //rotate by 180 degrees
-	float LevelHeight = chosenDoor->GetRelativeLocation().Z; 
+	float LevelHeight = chosenDoor->GetRelativeLocation().Z;
 	NewLevel->AddActorWorldOffset(FVector(0, 0, -2 * LevelHeight)); //invert the door location change
 	//UE_LOG(LogTemp, Warning, TEXT("Room height: %f"), LevelHeight) //Debug door height.
+	TArray<int32> validDoors;
 	for (int32 i = nodes.Num() - 1; i >= 0; i--)
 	{
-		if (nodes[i]->GetComponentRotation().Quaternion().GetAngle() > PI * 0.9f) nodes.RemoveAt(i); //Ensures that the rooms never loop back on themselves, preventing most collisions.
-		else if (nodes[i]->GetComponentRotation() == chosenDoor->GetComponentRotation()) nodes.RemoveAt(i); //If 2 doors are on the same wall, they will likely cause collisions etc.
+		if (i == chosenDoorInt) break; //so that we don't choose the same node for entry and exit.
+		if (nodes[i]->GetComponentRotation().Quaternion().GetAngle() < PI * 0.9f) //Ensures that the rooms never loop back on themselves, preventing most collisions.
+		{
+			if (nodes[i]->GetComponentRotation() != chosenDoor->GetComponentRotation()) //If 2 doors are on the same wall, they will likely cause collisions etc.
+			{
+				validDoors.Add(i);
+			}
+		}
 	}
-	if(nodes.Num() == 0) return;
-	int32 chosenDoorInt2 = FMath::RandRange(0, nodes.Num() - 1);
-	chosenDoor = nodes[chosenDoorInt2];
+	if (validDoors.Num() == 0) return;
+	int32 chosenDoorInt2 = FMath::RandRange(0, validDoors.Num() - 1);
+	chosenDoor = nodes[validDoors[chosenDoorInt2]];
 
 	chosenDoor->GetChildComponent(0)->DestroyComponent(); //A doorway will be made on the other side.
 
@@ -89,8 +97,7 @@ void ALevelGenerator::SpawnRoom(TArray<TSubclassOf<ALevelData>> palette)
 		lastNode->ConnectedNodes.Add(NavPointsNode[chosenDoorInt]);
 		NavPointsNode[chosenDoorInt]->ConnectedNodes.Add(lastNode);
 	}
-	NavPointsNode.RemoveAt(chosenDoorInt);
-	lastNode = NavPointsNode[chosenDoorInt2];
+	lastNode = NavPointsNode[validDoors[chosenDoorInt2]];
 	rooms.Add(NewLevel);
 }
 
