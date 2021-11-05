@@ -22,6 +22,7 @@ public:
 	int32 CurrentNodes;
 	UPROPERTY(EditAnywhere)
 	bool bSpawnHallways;
+	bool bSpawnedAI;
 
 	UPROPERTY(EditAnywhere)
 	TArray<TSubclassOf<ALevelData>> LevelPalette; //Array of level blueprints to be instantiated
@@ -48,6 +49,7 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	void SpawnRoom(TArray<TSubclassOf<ALevelData>> palette);
+	void CheckSpawnRoom();
 	//bool CheckNear(int i);
 
 public:	
