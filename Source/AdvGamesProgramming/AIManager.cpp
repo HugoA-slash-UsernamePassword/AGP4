@@ -19,6 +19,9 @@ AAIManager::AAIManager()
 void AAIManager::BeginPlay()
 {
 	Super::BeginPlay();
+	bAIStarted = false;
+	NumAISpawned = 0;
+	NumAISquadSpawned = 0;
 }
 
 void AAIManager::BeginAI()
@@ -26,8 +29,9 @@ void AAIManager::BeginAI()
 	if (AllNodes.Num() == 0)
 	{
 		UE_LOG(LogTemp, Display, TEXT("POPULATING NODES"))
-			PopulateNodes();
+		PopulateNodes();
 	}
+	bAIStarted = true;
 	CreateAgents();
 	UE_LOG(LogTemp, Warning, TEXT("Number of nodes: %i"), AllNodes.Num())
 }
@@ -36,6 +40,10 @@ void AAIManager::BeginAI()
 void AAIManager::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	if (bAIStarted)
+	{
+		CreateAgents();
+	}
 	
 }
 
@@ -134,17 +142,27 @@ void AAIManager::CreateAgents()
 {
 	if (AllNodes.Num() > 0)
 	{
-		for (int32 i = 0; i < NumAI; i++)
+		if (NumAISpawned < NumAI)
 		{
 			// Get a random node index
 			CreateSingleAI();
-		}
-
-		for (int32 i = 0; i < NumAISquad; i++)
-		{
-			CreateSquad(FMath::RandRange(AISquadMinSize, AISquadMaxSize));
+			NumAISpawned++;
 		}
 	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("No Nodes to spawn AI"));
+	}
+
+	if (MainNodes.Num() > 0)
+	{
+		if (NumAISquadSpawned < NumAISquad)
+		{
+			CreateSquad(FMath::RandRange(AISquadMinSize, AISquadMaxSize));
+			NumAISquadSpawned++;
+		}
+	}
+	else UE_LOG(LogTemp, Warning, TEXT("No Main Nodes to spawn Squads"));
 }
 
 void AAIManager::CreateSingleAI()
@@ -157,6 +175,7 @@ void AAIManager::CreateSingleAI()
 	AEnemyCharacter* SpawnedEnemy = GetWorld()->SpawnActor<AEnemyCharacter>(AgentToSpawn, AllNodes[NodeIndex]->GetActorLocation(), AllNodes[NodeIndex]->GetActorRotation());
 	SpawnedEnemy->Manager = this;
 	SpawnedEnemy->CurrentNode = AllNodes[NodeIndex];
+	SpawnedEnemy->LastNode = AllNodes[NodeIndex];
 	AllNodes[NodeIndex]->bIsOccupied = true;
 }
 
