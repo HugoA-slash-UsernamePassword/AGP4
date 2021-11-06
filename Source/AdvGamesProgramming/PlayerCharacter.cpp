@@ -15,6 +15,8 @@ APlayerCharacter::APlayerCharacter()
 
 	//Set default member variable values
 	LookSensitivity = 1.0f;
+	NormalMovementSpeed = 600.0f;
+	SprintMultiplier = 1.5;
 }
 
 // Called when the game starts or when spawned
@@ -23,6 +25,7 @@ void APlayerCharacter::BeginPlay()
 	Super::BeginPlay();
 	Camera = FindComponentByClass<UCameraComponent>();
 	bCanDoubleJump = true;
+	SprintMovementSpeed = NormalMovementSpeed * SprintMultiplier;
 	//bUseControllerRotationPitch = true;
 
 }
@@ -93,11 +96,25 @@ void APlayerCharacter::Turn(float Value)
 }
 
 void APlayerCharacter::SprintStart() {
-	GetCharacterMovement()->MaxWalkSpeed = 600.0f*SprintMultiplier;
+	GetCharacterMovement()->MaxWalkSpeed = SprintMovementSpeed;
+
+	ServerSprintStart();
+}
+
+void APlayerCharacter::ServerSprintStart_Implementation()
+{
+	GetCharacterMovement()->MaxWalkSpeed = SprintMovementSpeed;
 }
 
 void APlayerCharacter::SprintEnd() {
 	GetCharacterMovement()->MaxWalkSpeed = 600.0f;
+
+	ServerSprintEnd();
+}
+
+void APlayerCharacter::ServerSprintEnd_Implementation()
+{
+	GetCharacterMovement()->MaxWalkSpeed = NormalMovementSpeed;
 }
 
 void APlayerCharacter::StartCrouch() {

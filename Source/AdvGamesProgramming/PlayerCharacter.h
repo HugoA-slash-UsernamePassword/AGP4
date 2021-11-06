@@ -30,6 +30,12 @@ protected:
 	float ForwardAxis;
 	float StrafeAxis;
 
+	
+	float SprintMovementSpeed;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float NormalMovementSpeed;
+
 public:	
 
 	UPROPERTY(EditAnywhere)
@@ -51,6 +57,12 @@ public:
 
 	void SprintStart();
 	void SprintEnd();
+
+	UFUNCTION(Server, Reliable)
+		void ServerSprintStart();
+
+	UFUNCTION(Server, Reliable)
+		void ServerSprintEnd();
 
 	void StartCrouch();
 	void EndCrouch();
