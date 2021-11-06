@@ -48,9 +48,9 @@ void ALevelGenerator::SpawnRoom(TArray<TSubclassOf<ALevelData>> palette)
 		if (nodes[i]->ComponentHasTag("Nav")) NavPoints.Add(nodes[i]);
 		if (!nodes[i]->ComponentHasTag("Node"))	nodes.RemoveAt(i); //Remove from list if it is not a level node (doorway)
 	}
-	if (nodes.Num() == 0) return; //Aborts the function if we run out of level nodes.
+	if (nodes.Num() == 0) { UE_LOG(LogTemp, Error, TEXT("Ran out of nodes :(")) return; } //Aborts the function if we run out of level nodes.
 	//int32 chosenDoorInt = seed.RandRange(0, nodes.Num() - 1); //Random node from available nodes
-	int32 chosenDoorInt = 0;
+	int32 chosenDoorInt = 2;
 	USceneComponent* chosenDoor = nodes[chosenDoorInt];
 	UStaticMeshComponent* _doorway = Cast<UStaticMeshComponent>(chosenDoor->GetChildComponent(0));
 	_doorway->SetStaticMesh(doorway); //Set doorway mesh
@@ -66,7 +66,7 @@ void ALevelGenerator::SpawnRoom(TArray<TSubclassOf<ALevelData>> palette)
 	TArray<int32> validDoors;
 	for (int32 i = nodes.Num() - 1; i >= 0; i--)
 	{
-		if (i == chosenDoorInt) break; //so that we don't choose the same node for entry and exit.
+		//if (i == chosenDoorInt) break; //so that we don't choose the same node for entry and exit.
 		if (nodes[i]->GetComponentRotation().Quaternion().GetAngle() < PI * 0.9f) //Ensures that the rooms never loop back on themselves, preventing most collisions.
 		{
 			if (nodes[i]->GetComponentRotation() != chosenDoor->GetComponentRotation()) //If 2 doors are on the same wall, they will likely cause collisions etc.
@@ -75,7 +75,7 @@ void ALevelGenerator::SpawnRoom(TArray<TSubclassOf<ALevelData>> palette)
 			}
 		}
 	}
-	if (validDoors.Num() == 0) return;
+	if (validDoors.Num() == 0) { UE_LOG(LogTemp, Error, TEXT("No valid exits found")) return; }
 	int32 chosenDoorInt2 = seed.RandRange(0, validDoors.Num() - 1);
 	chosenDoor = nodes[validDoors[chosenDoorInt2]];
 
