@@ -210,6 +210,10 @@ void AAIManager::CreateSquad(int32 SquadMemberCount)
 			SpawnedEnemy->Superior = LastEnemy;
 			if (LastEnemy) LastEnemy->Inferior = SpawnedEnemy;
 			ChosenNode->bIsOccupied = true;
+			if (!LastEnemy)
+			{
+				SpawnedEnemy->Path = GeneratePath(ChosenNode, MainNodes[FMath::RandRange(0, MainNodes.Num() - 1)]);
+			}
 			LastEnemy = SpawnedEnemy;
 		}
 

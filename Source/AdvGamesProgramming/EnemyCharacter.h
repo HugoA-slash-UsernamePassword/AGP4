@@ -81,6 +81,9 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void Fire(FVector FireDirection);
 
+	void FindPath();
+	bool bIsStuck;
+
 private:
 
 	void MoveAlongPath();
