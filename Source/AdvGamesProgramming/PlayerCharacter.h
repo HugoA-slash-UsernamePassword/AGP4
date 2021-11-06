@@ -67,11 +67,16 @@ public:
 	(
 		const FHitResult& Hit
 	) override;
+
 	virtual void Jump() override;
 
 	void Reload();
+	void StartJump();
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void BlueprintReload();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void BlueprintJump();
 
 };
