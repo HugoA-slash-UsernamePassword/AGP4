@@ -79,46 +79,7 @@ void AEnemyCharacter::Tick(float DeltaTime)
 		DetectedActor = Superior->DetectedActor;
 	}
 
-	if (CurrentAgentState == AgentState::PATROL)
-	{
-		AgentPatrol();
-		if (bCanSeeActor && HealthComponent->HealthPercentageRemaining() >= 40.0f)
-		{
-			CurrentAgentState = AgentState::ENGAGE;
-			Path.Empty();
-		}
-		else if (bCanSeeActor && HealthComponent->HealthPercentageRemaining() < 40.0f)
-		{
-			CurrentAgentState = AgentState::EVADE;
-			Path.Empty();
-		}
-	}
-	else if (CurrentAgentState == AgentState::ENGAGE)
-	{
-		AgentEngage();
-		if (!bCanSeeActor)
-		{
-			CurrentAgentState = AgentState::PATROL;
-		}
-		else if (bCanSeeActor && HealthComponent->HealthPercentageRemaining() < 40.0f)
-		{
-			CurrentAgentState = AgentState::EVADE;
-			Path.Empty();
-		}
-	}
-	else if (CurrentAgentState == AgentState::EVADE)
-	{
-		AgentEvade();
-		if (!bCanSeeActor)
-		{
-			CurrentAgentState = AgentState::PATROL;
-		}
-		else if (bCanSeeActor && HealthComponent->HealthPercentageRemaining() >= 40.0f)
-		{
-			CurrentAgentState = AgentState::ENGAGE;
-			Path.Empty();
-		}
-	}
+	FindPath();
 
 
 	if (HealthComponent->CurrentHealth == 0)
@@ -230,6 +191,7 @@ void AEnemyCharacter::MoveAlongPath()
 		LastNode = CurrentNode;
 		CurrentNode = Path.Pop();
 		ANavigationNode* NextNode = CurrentNode;
+		bIsStuck = false;
 
 		if (Path.Num() == 0 && CurrentNode->bIsOccupied)
 		{
@@ -262,15 +224,31 @@ void AEnemyCharacter::MoveAlongPath()
 		AddMovementInput(CurrentNode->GetActorLocation() - GetActorLocation());
 		if (TravelTimer <= 0)
 		{
+			TravelTimer = MaxTimeBeforeReroute;
 			Path.Insert(CurrentNode, 0);
-			if (LastNode)
+			if (!LastNode)
 			{
-				CurrentNode = LastNode;
+				CurrentNode = Manager->FindNearestNode(GetActorLocation());
+				FindPath();
+				
+			}
+			else if (LastNode->bIsOccupied)
+			{
+				CurrentNode = Manager->FindNearestNode(GetActorLocation());
+				FindPath();
+			}
+			else if (bIsStuck)
+			{
+				CurrentNode = Manager->FindNearestNode(GetActorLocation());
+				FindPath();
 			}
 			else
 			{
-				CurrentNode = Manager->FindNearestNode(GetActorLocation());
+				CurrentNode = LastNode;
+				FindPath();
 			}
+
+			bIsStuck = true;
 			
 		}
 	}
@@ -280,5 +258,49 @@ void AEnemyCharacter::MoveAlongPath()
 		Path.Add(CurrentNode->ConnectedNodes[FMath::RandRange(0, CurrentNode->ConnectedNodes.Num() - 1)]);
 		CurrentNode = Path.Pop();
 	}*/
+}
+
+void  AEnemyCharacter::FindPath()
+{
+	if (CurrentAgentState == AgentState::PATROL)
+	{
+		AgentPatrol();
+		if (bCanSeeActor && HealthComponent->HealthPercentageRemaining() >= 40.0f)
+		{
+			CurrentAgentState = AgentState::ENGAGE;
+			Path.Empty();
+		}
+		else if (bCanSeeActor && HealthComponent->HealthPercentageRemaining() < 40.0f)
+		{
+			CurrentAgentState = AgentState::EVADE;
+			Path.Empty();
+		}
+	}
+	else if (CurrentAgentState == AgentState::ENGAGE)
+	{
+		AgentEngage();
+		if (!bCanSeeActor)
+		{
+			CurrentAgentState = AgentState::PATROL;
+		}
+		else if (bCanSeeActor && HealthComponent->HealthPercentageRemaining() < 40.0f)
+		{
+			CurrentAgentState = AgentState::EVADE;
+			Path.Empty();
+		}
+	}
+	else if (CurrentAgentState == AgentState::EVADE)
+	{
+		AgentEvade();
+		if (!bCanSeeActor)
+		{
+			CurrentAgentState = AgentState::PATROL;
+		}
+		else if (bCanSeeActor && HealthComponent->HealthPercentageRemaining() >= 40.0f)
+		{
+			CurrentAgentState = AgentState::ENGAGE;
+			Path.Empty();
+		}
+	}
 }
 
