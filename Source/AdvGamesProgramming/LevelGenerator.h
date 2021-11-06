@@ -32,6 +32,9 @@ public:
 	FTransform SpawnPoint; //Position to spawn the next door. Also the position to spawn the first door.
 
 	TArray<USceneComponent*> nodes; //Temp
+	int RowNum;
+	int RowDisplace;
+	int lastRowNum;
 
 	UPROPERTY(EditAnywhere)
 	UStaticMesh* doorway; //Doorway to add between rooms.
@@ -44,16 +47,20 @@ public:
 	UPROPERTY(EditAnywhere)
 	AAIManager* AIManager; //AIManager. Reference needed to setup navigation grid after all navigation nodes have been spawned.
 
+	FRandomStream seed;
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-	void SpawnRoom(TArray<TSubclassOf<ALevelData>> palette);
+	UFUNCTION(BlueprintCallable)
+	void Initialize(int32 seedInt);
+	UFUNCTION(BlueprintCallable)
 	void CheckSpawnRoom();
 	//bool CheckNear(int i);
 
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+	void SpawnRoom(TArray<TSubclassOf<ALevelData>> palette);
 
 };

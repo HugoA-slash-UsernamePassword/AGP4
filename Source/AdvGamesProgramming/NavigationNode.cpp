@@ -28,7 +28,6 @@ void ANavigationNode::DrawDebug()
 	for (auto It = ConnectedNodes.CreateConstIterator(); It; It++)
 	{
 		DrawDebugLine(GetWorld(), GetActorLocation(), (*It)->GetActorLocation(), FColor::White, true,-1.0f, (uint8)'\000', 1.0f);
-		UE_LOG(LogTemp, Display, TEXT("HI"))
 	}
 }
 
