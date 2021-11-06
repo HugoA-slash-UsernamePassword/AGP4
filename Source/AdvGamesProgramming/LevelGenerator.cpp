@@ -21,7 +21,7 @@ void ALevelGenerator::BeginPlay()
 	Super::BeginPlay();
 	bSpawnedAI = false;
 
-	CheckSpawnRoom();
+	//CheckSpawnRoom();
 	/*while (CurrentNodes < MaxNodes)
 	{
 		CurrentNodes++;
@@ -32,8 +32,13 @@ void ALevelGenerator::BeginPlay()
 }
 void ALevelGenerator::SpawnRoom(TArray<TSubclassOf<ALevelData>> palette)
 {
+	
+	if (palette.Num() == 0) palette = LevelPalette;
+	UE_LOG(LogTemp, Warning, TEXT("Initial seed: %i"), seed.GetInitialSeed()) //Debug door height.
+	
+
 	//DrawDebugPoint(GetWorld(), SpawnPoint.GetLocation(), 10.0f, FColor::Green, true); //Debug spawn point
-	TSubclassOf<ALevelData> LevelToSpawn = palette[FMath::RandRange(0, palette.Num() - 1)]; //Random level from selected palette
+	TSubclassOf<ALevelData> LevelToSpawn = palette[seed.RandRange(0, palette.Num() - 1)]; //Random level from selected palette
 	ALevelData* NewLevel = GetWorld()->SpawnActor<ALevelData>(LevelToSpawn, SpawnPoint); //Spawn level
 	NewLevel->GetComponents<USceneComponent>(nodes); //Get components
 	TArray<USceneComponent*> NavPoints; //Location to put navigation nodes
@@ -44,7 +49,7 @@ void ALevelGenerator::SpawnRoom(TArray<TSubclassOf<ALevelData>> palette)
 		if (!nodes[i]->ComponentHasTag("Node"))	nodes.RemoveAt(i); //Remove from list if it is not a level node (doorway)
 	}
 	if (nodes.Num() == 0) return; //Aborts the function if we run out of level nodes.
-	//int32 chosenDoorInt = FMath::RandRange(0, nodes.Num() - 1); //Random node from available nodes
+	//int32 chosenDoorInt = seed.RandRange(0, nodes.Num() - 1); //Random node from available nodes
 	int32 chosenDoorInt = 0;
 	USceneComponent* chosenDoor = nodes[chosenDoorInt];
 	UStaticMeshComponent* _doorway = Cast<UStaticMeshComponent>(chosenDoor->GetChildComponent(0));
@@ -71,7 +76,7 @@ void ALevelGenerator::SpawnRoom(TArray<TSubclassOf<ALevelData>> palette)
 		}
 	}
 	if (validDoors.Num() == 0) return;
-	int32 chosenDoorInt2 = FMath::RandRange(0, validDoors.Num() - 1);
+	int32 chosenDoorInt2 = seed.RandRange(0, validDoors.Num() - 1);
 	chosenDoor = nodes[validDoors[chosenDoorInt2]];
 
 	chosenDoor->GetChildComponent(0)->DestroyComponent(); //A doorway will be made on the other side.
@@ -101,12 +106,17 @@ void ALevelGenerator::SpawnRoom(TArray<TSubclassOf<ALevelData>> palette)
 	rooms.Add(NewLevel);
 }
 
-
 // Called every frame
 void ALevelGenerator::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	//CheckSpawnRoom();
+}
+
+void ALevelGenerator::Initialize(int32 seedInt)
+{
+	seed = FRandomStream(seedInt);
 	CheckSpawnRoom();
 }
 
@@ -116,7 +126,7 @@ void ALevelGenerator::CheckSpawnRoom()
 	{
 		CurrentNodes++;
 		SpawnRoom(LevelPalette);
-		if (bSpawnHallways) SpawnRoom(JoinPalette);
+		//if (bSpawnHallways) SpawnRoom(JoinPalette);
 	}
 	else if (!bSpawnedAI)
 	{
