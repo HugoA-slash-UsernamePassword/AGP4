@@ -20,7 +20,19 @@ void UHealthComponent::BeginPlay()
 	Super::BeginPlay();
 
 	CurrentHealth = MaxHealth;
+
+	HealthComponent = FindComponentByClass<UHealthComponent>();
+
+	if (HealthComponent != nullptr)
+	{
+		HealthComponent->SetIsReplicated(true);
+	}
 	
+}
+
+void UHealthComponent::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const
+{
+	DOREPLIFETIME(UHealthComponent, CurrentHealth);
 }
 
 
@@ -41,6 +53,8 @@ void UHealthComponent::OnTakeDamage(float Damage)
 		OnDeath();
 	}
 }
+
+
 
 void UHealthComponent::OnDeath()
 {
