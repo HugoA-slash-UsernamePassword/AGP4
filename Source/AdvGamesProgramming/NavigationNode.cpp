@@ -12,6 +12,12 @@ ANavigationNode::ANavigationNode()
 
 	LocationComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Location Component"));
 	RootComponent = LocationComponent;
+	bReplicates = true;
+}
+
+void ANavigationNode::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const
+{
+	DOREPLIFETIME(ANavigationNode, bIsOccupied);
 }
 
 // Called when the game starts or when spawned

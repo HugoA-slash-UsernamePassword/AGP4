@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Net/UnrealNetwork.h"
 #include "NavigationNode.generated.h"
 
 UCLASS()
@@ -29,7 +30,7 @@ public:
 	float GScore;
 	float HScore;
 	UPROPERTY(EditAnywhere) bool bIsMainNode;
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Replicated)
 	bool bIsOccupied;
 	ANavigationNode* CameFrom;
 

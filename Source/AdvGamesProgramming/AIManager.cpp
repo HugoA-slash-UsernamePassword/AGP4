@@ -13,15 +13,19 @@ AAIManager::AAIManager()
 	PrimaryActorTick.bCanEverTick = true;
 
 	AllowedAngle = 0.4f;
+	bReplicates = true;
+}
+
+void AAIManager::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const
+{
+	DOREPLIFETIME(AAIManager, NumAISpawned);
+	DOREPLIFETIME(AAIManager, NumAISquadSpawned);
 }
 
 // Called when the game starts or when spawned
 void AAIManager::BeginPlay()
 {
 	Super::BeginPlay();
-	bAIStarted = false;
-	NumAISpawned = 0;
-	NumAISquadSpawned = 0;
 }
 
 void AAIManager::BeginAI()
@@ -32,8 +36,22 @@ void AAIManager::BeginAI()
 		PopulateNodes();
 	}
 	bAIStarted = true;
-	CreateAgents();
-	UE_LOG(LogTemp, Warning, TEXT("Number of nodes: %i"), AllNodes.Num())
+	//CreateAgents();
+	UE_LOG(LogTemp, Warning, TEXT("Number of nodes: %i"), AllNodes.Num());
+
+	ServerBeginAI();
+}
+
+void AAIManager::ServerBeginAI_Implementation()
+{
+	BeginAI();
+
+	MulticastBeginAI();
+}
+
+void AAIManager::MulticastBeginAI_Implementation()
+{
+	BeginAI();
 }
 
 // Called every frame
@@ -127,7 +145,7 @@ TArray<ANavigationNode*> AAIManager::ReconstructPath(ANavigationNode* StartNode,
 
 void AAIManager::PopulateNodes()
 {
-	for (TActorIterator<ANavigationNode> It(GetWorld()); It; ++It)
+	/*for (TActorIterator<ANavigationNode> It(GetWorld()); It; ++It)
 	{
 		AllNodes.Add(*It);
 		if (It->bIsMainNode)
@@ -135,7 +153,14 @@ void AAIManager::PopulateNodes()
 			MainNodes.Add(*It);
 		}
 		It->DrawDebug();
-	}
+	}*/
+
+	ServerPopulateNodes();
+}
+
+void AAIManager::ServerPopulateNodes_Implementation()
+{
+	PopulateNodes();
 }
 
 void AAIManager::CreateAgents()

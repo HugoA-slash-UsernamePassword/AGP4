@@ -1,9 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
+#include "LevelGenerator.h"
 #include "GameFramework/Actor.h"
 #include "CoreMinimal.h"
 #include "EngineUtils.h"
-#include "LevelGenerator.h"
 #include "DrawDebugHelpers.h"
 
 
@@ -19,7 +19,6 @@ ALevelGenerator::ALevelGenerator()
 void ALevelGenerator::BeginPlay()
 {
 	Super::BeginPlay();
-	bSpawnedAI = false;
 
 	//CheckSpawnRoom();
 	/*while (CurrentNodes < MaxNodes)
