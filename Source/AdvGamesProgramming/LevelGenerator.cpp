@@ -53,7 +53,7 @@ void ALevelGenerator::SpawnRoom(TSubclassOf<ALevelData> room)
 void ALevelGenerator::GenerateRoom(ALevelData* NewLevel)
 {
 	int diffRowNum = (RowNum + lastRowNum) * FMath::Sign(RowNum);
-	bool turnBack = RowNum == lastDisplaceNum && lastDisplaceNum != 0;
+	bool turnBack = RowNum == lastDisplaceNum && lastDisplaceNum != 999;
 	NewLevel->GetComponents<USceneComponent>(nodes); //Get components
 	TArray<USceneComponent*> NavPoints; //Location to put navigation nodes
 	for (int32 i = nodes.Num() - 1; i >= 0; i--)
@@ -90,7 +90,7 @@ void ALevelGenerator::GenerateRoom(ALevelData* NewLevel)
 	NewLevel->AddActorWorldOffset(FVector(0, 0, -2 * LevelHeight)); //invert the door location change
 	//UE_LOG(LogTemp, Warning, TEXT("Room height: %f"), LevelHeight) //Debug door height.
 	TArray<int32> validDoors;
-	UE_LOG(LogTemp, Warning, TEXT("Row num: %i"), RowNum);
+	UE_LOG(LogTemp, Warning, TEXT("Row %i"), RowNum);
 
 	for (int32 i = nodes.Num() - 1; i >= 0; i--)
 	{
@@ -102,17 +102,19 @@ void ALevelGenerator::GenerateRoom(ALevelData* NewLevel)
 		if ((nodes[i]->GetComponentLocation().X - NewLevel->GetActorLocation().X) > 1300) { DisplaceNum = RowNum; RowDisplace += nodes[i]->GetComponentLocation().X - NewLevel->GetActorLocation().X - 1200; }
 		if (diffRowNum < 0)
 		{
+			UE_LOG(LogTemp, Error, TEXT("diffrownum bug"))
 			if (NewLevel->dangerNodes.Contains(i)) continue;
 		}
 		else if (RowDisplace > 800)
 		{
+			UE_LOG(LogTemp, Error, TEXT("Rowdisplace bug %f"), RowDisplace)
 			if (NewLevel->dangerNodes.Contains(i)) continue;
 		}
 		else if (lastDisplaceNum == RowNum + FMath::Sign(nodes[i]->GetComponentRotation().Quaternion().Z) && !(FMath::IsNearlyZero(nodes[i]->GetComponentRotation().Quaternion().Z, 0.001f)))
 		{
 			continue;
 		}
-		UE_LOG(LogTemp, Error, TEXT("WAHSAfhszufdi0bvsdf: %f"), RowNum + FMath::Sign(nodes[i]->GetComponentRotation().Quaternion().Z));
+		//UE_LOG(LogTemp, Error, TEXT("WAHSAfhszufdi0bvsdf: %f"), RowNum + FMath::Sign(nodes[i]->GetComponentRotation().Quaternion().Z));
 		if (nodes[i]->GetComponentRotation().Quaternion().GetAngle() < PI * 0.9f) //Ensures that the rooms never loop back on themselves, preventing most collisions.
 		{
 			if (nodes[i]->GetComponentRotation() != chosenDoor->GetComponentRotation()) //If 2 doors are on the same wall, they will likely cause collisions etc.
@@ -121,33 +123,39 @@ void ALevelGenerator::GenerateRoom(ALevelData* NewLevel)
 			}
 		}
 	}
-	if (validDoors.Num() == 0) { UE_LOG(LogTemp, Error, TEXT("No valid exit found")) return; }
+	if (validDoors.Num() == 0) { NewLevel->Destroy(); UE_LOG(LogTemp, Error, TEXT("No valid exit found")) return; }
 	int32 chosenDoorInt2 = validDoors[seed.RandRange(0, validDoors.Num() - 1)];
 	chosenDoor = nodes[chosenDoorInt2];
 	float doorAngle = chosenDoor->GetComponentRotation().Quaternion().Z;
-	float newDisplace = chosenDoor->GetComponentLocation().X - nodes[chosenDoorInt]->GetComponentLocation().X;
-	if(RowNum != 0) RowDisplace += newDisplace;
-	if (newDisplace > 150) {
-		DisplaceNum = RowNum;
-		UE_LOG(LogTemp, Error, TEXT("what the fuck"))
-	}
-	else if (RowDisplace < 150) DisplaceNum = 999;
+
 	if (FMath::IsNearlyZero(doorAngle, 0.001f)) {
 		lastRowNum = RowNum;
 		lastDisplaceNum = DisplaceNum - RowNum; // -FMath::Sign(RowNum);
 		RowNum = 0;
-		RowDisplace = 999;
+		RowDisplace = 0;
+		DisplaceNum = 999;
 	}
 	else {
 		//if (RowNum == 0) RowNum += FMath::Sign(doorAngle);
 		//if (DisplaceNum == 0) DisplaceNum += FMath::Sign(doorAngle);
 		RowNum += FMath::Sign(doorAngle);
-		UE_LOG(LogTemp, Log, TEXT("Spawn degrees: %f"), doorAngle);
+		if (doorAngle < 0) { UE_LOG(LogTemp, Log, TEXT("Going left"), doorAngle); }
+		else { UE_LOG(LogTemp, Log, TEXT("Going right"), doorAngle) };
 	}
+	float newDisplace = chosenDoor->GetComponentLocation().X - nodes[chosenDoorInt]->GetComponentLocation().X;
+	if (RowNum != 0) RowDisplace += newDisplace;
+	if (newDisplace > 150) {
+		DisplaceNum = RowNum;
+		RowDisplace += newDisplace;
+		UE_LOG(LogTemp, Error, TEXT("what the fuck"))
+			UE_LOG(LogTemp, Warning, TEXT("Diff row num: %f"), RowDisplace);
+	}
+	else if (RowDisplace < 150) DisplaceNum = 999;
 	//UE_LOG(LogTemp, Warning, TEXT("Displacement: %f"), RowDisplace);
-	UE_LOG(LogTemp, Warning, TEXT("Row num: %i"), RowNum);
+	//UE_LOG(LogTemp, Warning, TEXT("Row num: %i"), RowNum);
 	UE_LOG(LogTemp, Warning, TEXT("Displacement: %i"), DisplaceNum);
-	UE_LOG(LogTemp, Warning, TEXT("Displacement: %i"), lastDisplaceNum);
+
+	//UE_LOG(LogTemp, Warning, TEXT("Displacement: %i"), RowDisplace);
 
 
 
@@ -161,13 +169,13 @@ void ALevelGenerator::GenerateRoom(ALevelData* NewLevel)
 	{
 		ANavigationNode* _node = GetWorld()->SpawnActor<ANavigationNode>(NodeToSpawn, NavPoints[i]->GetComponentTransform());
 		NavPointsNode.Add(_node); //Create nodes based on NavPoints.
-		_node->bIsMainNode = true;
 	}
 	for (size_t i = 0; i < NewLevel->connections.Num(); i++)
 	{
 		FMapNode MNode = NewLevel->connections[i];
 		NavPointsNode[MNode.start]->ConnectedNodes.Add(NavPointsNode[MNode.end]);
 		if (!MNode.oneway) NavPointsNode[MNode.end]->ConnectedNodes.Add(NavPointsNode[MNode.start]);
+		NavPointsNode[MNode.start]->bIsMainNode = MNode.main;
 	}
 	if (lastNode != NULL)
 	{
