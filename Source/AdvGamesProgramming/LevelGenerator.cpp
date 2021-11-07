@@ -64,7 +64,7 @@ void ALevelGenerator::GenerateRoom(ALevelData* NewLevel)
 	TArray<int32> validEntry;
 	for (int32 i = nodes.Num() - 1; i >= 0; i--)
 	{
-		if (diffRowNum < 0)
+		if (diffRowNum <= 0)
 		{
 			if (NewLevel->dangerNodes.Contains(i)) continue;
 		}
@@ -100,14 +100,14 @@ void ALevelGenerator::GenerateRoom(ALevelData* NewLevel)
 			if (!FMath::IsNearlyZero(nodes[i]->GetComponentRotation().Quaternion().Z, 0.001f)) continue;
 		}
 		if ((nodes[i]->GetComponentLocation().X - NewLevel->GetActorLocation().X) > 1300) { DisplaceNum = RowNum; RowDisplace += nodes[i]->GetComponentLocation().X - NewLevel->GetActorLocation().X - 1200; }
-		if (diffRowNum < 0)
+		if (diffRowNum <= 0)
 		{
-			UE_LOG(LogTemp, Error, TEXT("diffrownum bug"))
+			UE_LOG(LogTemp, Warning, TEXT("diffrownum bug"))
 			if (NewLevel->dangerNodes.Contains(i)) continue;
 		}
 		else if (RowDisplace > 800)
 		{
-			UE_LOG(LogTemp, Error, TEXT("Rowdisplace bug %f"), RowDisplace)
+			UE_LOG(LogTemp, Warning, TEXT("Rowdisplace bug %f"), RowDisplace)
 			if (NewLevel->dangerNodes.Contains(i)) continue;
 		}
 		else if (lastDisplaceNum == RowNum + FMath::Sign(nodes[i]->GetComponentRotation().Quaternion().Z) && !(FMath::IsNearlyZero(nodes[i]->GetComponentRotation().Quaternion().Z, 0.001f)))
