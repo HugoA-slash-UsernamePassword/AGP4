@@ -13,7 +13,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AdvGamesProgramming", "Inte
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Visualizers", "Visualizers", "{30E39EAD-F17B-4E9F-A2AC-FE1E1E88962C}"
 	ProjectSection(SolutionItems) = preProject
-		..\..\..\Steam\steamapps\common\UE_4.24\Engine\Extras\VisualStudioDebugging\UE4.natvis = ..\..\..\Steam\steamapps\common\UE_4.24\Engine\Extras\VisualStudioDebugging\UE4.natvis
+		D:\Epic Games\UE_4.24\Engine\Extras\VisualStudioDebugging\UE4.natvis = D:\Epic Games\UE_4.24\Engine\Extras\VisualStudioDebugging\UE4.natvis
 	EndProjectSection
 EndProject
 Global
