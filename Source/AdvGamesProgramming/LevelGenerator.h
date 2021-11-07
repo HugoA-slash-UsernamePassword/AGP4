@@ -33,8 +33,10 @@ public:
 
 	TArray<USceneComponent*> nodes; //Temp
 	int RowNum;
-	int RowDisplace;
+	float RowDisplace;
 	int lastRowNum;
+	int DisplaceNum;
+	int lastDisplaceNum;
 
 	UPROPERTY(EditAnywhere)
 	UStaticMesh* doorway; //Doorway to add between rooms.
@@ -62,5 +64,6 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	void SpawnRoom(TArray<TSubclassOf<ALevelData>> palette);
-
+	void SpawnRoom(TSubclassOf<ALevelData> room);
+	void GenerateRoom(ALevelData* NewLevel);
 };

@@ -34,6 +34,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<FMapNode> connections;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<int> dangerNodes;
 	//TArray<int32> connections;
 
 protected:
