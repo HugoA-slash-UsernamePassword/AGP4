@@ -27,6 +27,13 @@ void APlayerCharacter::BeginPlay()
 	SprintMovementSpeed = NormalMovementSpeed * SprintMultiplier;
 	//bUseControllerRotationPitch = true;
 
+	HealthComponent = FindComponentByClass<UHealthComponent>();
+
+	if (HealthComponent != nullptr)
+	{
+		HealthComponent->SetIsReplicated(true);
+	}
+
 }
 
 // Called every frame

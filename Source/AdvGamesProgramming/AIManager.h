@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Net/UnrealNetwork.h"
 #include "AIManager.generated.h"
 
 UCLASS()
@@ -15,17 +14,7 @@ class ADVGAMESPROGRAMMING_API AAIManager : public AActor
 public:	
 	// Sets default values for this actor's properties
 	AAIManager();
-	
-	UFUNCTION(Server, Reliable)
-	void ServerBeginAI();
-
-	UFUNCTION(NetMulticast, Reliable)
-	void MulticastBeginAI();
-
 	void BeginAI();
-
-	UFUNCTION(Server, Reliable)
-	void ServerPopulateNodes();
 
 protected:
 	// Called when the game starts or when spawned
@@ -35,11 +24,9 @@ protected:
 public:	
 	UPROPERTY(EditAnywhere, Category = "AI Properties")
 	int32 NumAI;
-	UPROPERTY(replicated)
 	int32 NumAISpawned;
 	UPROPERTY(EditAnywhere, Category = "AI Properties")
 	int32 NumAISquad;
-	UPROPERTY(Replicated)
 	int32 NumAISquadSpawned;
 	UPROPERTY(EditAnywhere, Category = "AI Properties")
 	int32 AISquadMaxSize;

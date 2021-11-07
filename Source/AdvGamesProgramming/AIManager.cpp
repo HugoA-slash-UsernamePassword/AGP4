@@ -13,45 +13,25 @@ AAIManager::AAIManager()
 	PrimaryActorTick.bCanEverTick = true;
 
 	AllowedAngle = 0.4f;
-	bReplicates = true;
-}
-
-void AAIManager::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const
-{
-	DOREPLIFETIME(AAIManager, NumAISpawned);
-	DOREPLIFETIME(AAIManager, NumAISquadSpawned);
 }
 
 // Called when the game starts or when spawned
 void AAIManager::BeginPlay()
 {
 	Super::BeginPlay();
+	bAIStarted = false;
+	NumAISpawned = 0;
+	NumAISquadSpawned = 0;
 }
 
 void AAIManager::BeginAI()
-{
+{		
 	if (AllNodes.Num() == 0)
 	{
-		UE_LOG(LogTemp, Display, TEXT("POPULATING NODES"))
 		PopulateNodes();
 	}
 	bAIStarted = true;
-	//CreateAgents();
-	UE_LOG(LogTemp, Warning, TEXT("Number of nodes: %i"), AllNodes.Num());
-
-	ServerBeginAI();
-}
-
-void AAIManager::ServerBeginAI_Implementation()
-{
-	BeginAI();
-
-	MulticastBeginAI();
-}
-
-void AAIManager::MulticastBeginAI_Implementation()
-{
-	BeginAI();
+	CreateAgents();
 }
 
 // Called every frame
@@ -145,49 +125,48 @@ TArray<ANavigationNode*> AAIManager::ReconstructPath(ANavigationNode* StartNode,
 
 void AAIManager::PopulateNodes()
 {
-	/*for (TActorIterator<ANavigationNode> It(GetWorld()); It; ++It)
-	{
-		AllNodes.Add(*It);
-		if (It->bIsMainNode)
+		for (TActorIterator<ANavigationNode> It(GetWorld()); It; ++It)
 		{
-			MainNodes.Add(*It);
+			if (*It)
+			{
+				AllNodes.Add(*It);
+				if (It->bIsMainNode)
+				{
+					MainNodes.Add(*It);
+				}
+				It->DrawDebug();
+			}
 		}
-		It->DrawDebug();
-	}*/
-
-	ServerPopulateNodes();
-}
-
-void AAIManager::ServerPopulateNodes_Implementation()
-{
-	PopulateNodes();
 }
 
 void AAIManager::CreateAgents()
 {
-	if (AllNodes.Num() > 0)
+	if (GetLocalRole() == ENetRole::ROLE_Authority)
 	{
-		if (NumAISpawned < NumAI)
+		if (AllNodes.Num() > 0)
 		{
-			// Get a random node index
-			CreateSingleAI();
-			NumAISpawned++;
+			if (NumAISpawned < NumAI)
+			{
+				// Get a random node index
+				CreateSingleAI();
+				NumAISpawned++;
+			}
 		}
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("No Nodes to spawn AI"));
-	}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("No Nodes to spawn AI"));
+		}
 
-	if (MainNodes.Num() > 0)
-	{
-		if (NumAISquadSpawned < NumAISquad)
+		if (MainNodes.Num() > 0)
 		{
-			CreateSquad(FMath::RandRange(AISquadMinSize, AISquadMaxSize));
-			NumAISquadSpawned++;
+			if (NumAISquadSpawned < NumAISquad)
+			{
+				CreateSquad(FMath::RandRange(AISquadMinSize, AISquadMaxSize));
+				NumAISquadSpawned++;
+			}
 		}
+		else UE_LOG(LogTemp, Warning, TEXT("No Main Nodes to spawn Squads"));
 	}
-	else UE_LOG(LogTemp, Warning, TEXT("No Main Nodes to spawn Squads"));
 }
 
 void AAIManager::CreateSingleAI()
