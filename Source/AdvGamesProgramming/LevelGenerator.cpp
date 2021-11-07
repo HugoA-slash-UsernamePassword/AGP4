@@ -90,6 +90,8 @@ void ALevelGenerator::GenerateRoom(ALevelData* NewLevel)
 	NewLevel->AddActorWorldOffset(FVector(0, 0, -2 * LevelHeight)); //invert the door location change
 	//UE_LOG(LogTemp, Warning, TEXT("Room height: %f"), LevelHeight) //Debug door height.
 	TArray<int32> validDoors;
+	UE_LOG(LogTemp, Warning, TEXT("Row num: %i"), RowNum);
+
 	for (int32 i = nodes.Num() - 1; i >= 0; i--)
 	{
 		//if (i == chosenDoorInt) break; //so that we don't choose the same node for entry and exit.
@@ -129,12 +131,12 @@ void ALevelGenerator::GenerateRoom(ALevelData* NewLevel)
 		DisplaceNum = RowNum;
 		UE_LOG(LogTemp, Error, TEXT("what the fuck"))
 	}
-	else if (RowDisplace < 150) DisplaceNum = 0;
+	else if (RowDisplace < 150) DisplaceNum = 999;
 	if (FMath::IsNearlyZero(doorAngle, 0.001f)) {
 		lastRowNum = RowNum;
-		lastDisplaceNum = DisplaceNum - RowNum;
+		lastDisplaceNum = DisplaceNum - RowNum; // -FMath::Sign(RowNum);
 		RowNum = 0;
-		RowDisplace = 0;
+		RowDisplace = 999;
 	}
 	else {
 		//if (RowNum == 0) RowNum += FMath::Sign(doorAngle);
