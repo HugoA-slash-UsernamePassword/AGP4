@@ -34,9 +34,9 @@ public:
 	TArray<USceneComponent*> nodes; //Temp
 	int RowNum;
 	float RowDisplace;
-	int lastRowNum;
+	int LastRowNum;
 	int DisplaceNum;
-	int lastDisplaceNum;
+	int LastDisplaceNum;
 
 	UPROPERTY(EditAnywhere)
 	UStaticMesh* doorway; //Doorway to add between rooms.
@@ -49,7 +49,7 @@ public:
 	UPROPERTY(EditAnywhere)
 	AAIManager* AIManager; //AIManager. Reference needed to setup navigation grid after all navigation nodes have been spawned.
 
-	FRandomStream seed;
+	FRandomStream Seed;
 
 protected:
 	// Called when the game starts or when spawned

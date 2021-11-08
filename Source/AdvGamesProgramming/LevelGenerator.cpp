@@ -35,12 +35,11 @@ void ALevelGenerator::SpawnRoom(TArray<TSubclassOf<ALevelData>> palette)
 
 	//DrawDebugPoint(GetWorld(), SpawnPoint.GetLocation(), 10.0f, FColor::Green, true); //Debug spawn point
 	TSubclassOf<ALevelData> LevelToSpawn;
-	if (RowNum == lastDisplaceNum && lastDisplaceNum != 0) {
+	if (RowNum == LastDisplaceNum && LastDisplaceNum != 0) {
 		LevelToSpawn = palette[0];
-		int temp = seed.RandRange(0, palette.Num() - 1);
-		UE_LOG(LogTemp, Error, TEXT("HI"))
+		UE_LOG(LogTemp, Warning, TEXT("Placing room 0"))
 	}
-	else LevelToSpawn = palette[seed.RandRange(0, palette.Num() - 1)]; //Random level from selected palette
+	else LevelToSpawn = palette[Seed.RandRange(0, palette.Num() - 1)]; //Random level from selected palette
 	ALevelData* NewLevel = GetWorld()->SpawnActor<ALevelData>(LevelToSpawn, SpawnPoint); //Spawn level
 	GenerateRoom(NewLevel);
 }
@@ -51,8 +50,8 @@ void ALevelGenerator::SpawnRoom(TSubclassOf<ALevelData> room)
 }
 void ALevelGenerator::GenerateRoom(ALevelData* NewLevel)
 {
-	int diffRowNum = (RowNum + lastRowNum) * FMath::Sign(RowNum);
-	bool turnBack = RowNum == lastDisplaceNum && lastDisplaceNum != 999;
+	int diffRowNum = (RowNum + LastRowNum) * FMath::Sign(RowNum);
+	bool turnBack = RowNum == LastDisplaceNum && LastDisplaceNum != 999;
 	NewLevel->GetComponents<USceneComponent>(nodes); //Get components
 	TArray<USceneComponent*> NavPoints; //Location to put navigation nodes
 	for (int32 i = nodes.Num() - 1; i >= 0; i--)
@@ -74,7 +73,7 @@ void ALevelGenerator::GenerateRoom(ALevelData* NewLevel)
 		validEntry.Add(i);
 	}
 	if (validEntry.Num() == 0) { UE_LOG(LogTemp, Error, TEXT("No valid entry found")) return; } //Aborts the function if we run out of level nodes.
-	int32 chosenDoorInt = validEntry[seed.RandRange(0, validEntry.Num() - 1)]; //Random node from available nodes
+	int32 chosenDoorInt = validEntry[Seed.RandRange(0, validEntry.Num() - 1)]; //Random node from available nodes
 	//int32 chosenDoorInt = 2;
 	USceneComponent* chosenDoor = nodes[chosenDoorInt];
 	UStaticMeshComponent* _doorway = Cast<UStaticMeshComponent>(chosenDoor->GetChildComponent(0));
@@ -89,7 +88,7 @@ void ALevelGenerator::GenerateRoom(ALevelData* NewLevel)
 	NewLevel->AddActorWorldOffset(FVector(0, 0, -2 * LevelHeight)); //invert the door location change
 	//UE_LOG(LogTemp, Warning, TEXT("Room height: %f"), LevelHeight) //Debug door height.
 	TArray<int32> validDoors;
-	UE_LOG(LogTemp, Warning, TEXT("Row %i"), RowNum);
+	//UE_LOG(LogTemp, Warning, TEXT("Row %i"), RowNum);
 
 	for (int32 i = nodes.Num() - 1; i >= 0; i--)
 	{
@@ -101,15 +100,15 @@ void ALevelGenerator::GenerateRoom(ALevelData* NewLevel)
 		if ((nodes[i]->GetComponentLocation().X - NewLevel->GetActorLocation().X) > 1300) { DisplaceNum = RowNum; RowDisplace += nodes[i]->GetComponentLocation().X - NewLevel->GetActorLocation().X - 1200; }
 		if (diffRowNum <= 0)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("diffrownum bug"))
+			//UE_LOG(LogTemp, Warning, TEXT("diffrownum bug"))
 			if (NewLevel->dangerNodes.Contains(i)) continue;
 		}
 		else if (RowDisplace > 800)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Rowdisplace bug %f"), RowDisplace)
+			//UE_LOG(LogTemp, Warning, TEXT("Rowdisplace bug %f"), RowDisplace)
 			if (NewLevel->dangerNodes.Contains(i)) continue;
 		}
-		else if (lastDisplaceNum == RowNum + FMath::Sign(nodes[i]->GetComponentRotation().Quaternion().Z) && !(FMath::IsNearlyZero(nodes[i]->GetComponentRotation().Quaternion().Z, 0.001f)))
+		else if (LastDisplaceNum == RowNum + FMath::Sign(nodes[i]->GetComponentRotation().Quaternion().Z) && !(FMath::IsNearlyZero(nodes[i]->GetComponentRotation().Quaternion().Z, 0.001f)))
 		{
 			continue;
 		}
@@ -123,13 +122,13 @@ void ALevelGenerator::GenerateRoom(ALevelData* NewLevel)
 		}
 	}
 	if (validDoors.Num() == 0) { NewLevel->Destroy(); UE_LOG(LogTemp, Error, TEXT("No valid exit found")) return; }
-	int32 chosenDoorInt2 = validDoors[seed.RandRange(0, validDoors.Num() - 1)];
+	int32 chosenDoorInt2 = validDoors[Seed.RandRange(0, validDoors.Num() - 1)];
 	chosenDoor = nodes[chosenDoorInt2];
 	float doorAngle = chosenDoor->GetComponentRotation().Quaternion().Z;
 
 	if (FMath::IsNearlyZero(doorAngle, 0.001f)) {
-		lastRowNum = RowNum;
-		lastDisplaceNum = DisplaceNum - RowNum; // -FMath::Sign(RowNum);
+		LastRowNum = RowNum;
+		LastDisplaceNum = DisplaceNum - RowNum; // -FMath::Sign(RowNum);
 		RowNum = 0;
 		RowDisplace = 0;
 		DisplaceNum = 999;
@@ -146,13 +145,12 @@ void ALevelGenerator::GenerateRoom(ALevelData* NewLevel)
 	if (newDisplace > 150) {
 		DisplaceNum = RowNum;
 		RowDisplace += newDisplace;
-		UE_LOG(LogTemp, Error, TEXT("what the fuck"))
-			UE_LOG(LogTemp, Warning, TEXT("Diff row num: %f"), RowDisplace);
+		UE_LOG(LogTemp, Warning, TEXT("Warning: collision chance"), RowDisplace);
 	}
 	else if (RowDisplace < 150) DisplaceNum = 999;
 	//UE_LOG(LogTemp, Warning, TEXT("Displacement: %f"), RowDisplace);
 	//UE_LOG(LogTemp, Warning, TEXT("Row num: %i"), RowNum);
-	UE_LOG(LogTemp, Warning, TEXT("Displacement: %i"), DisplaceNum);
+	//UE_LOG(LogTemp, Warning, TEXT("Displacement: %i"), DisplaceNum);
 
 	//UE_LOG(LogTemp, Warning, TEXT("Displacement: %i"), RowDisplace);
 
@@ -195,8 +193,8 @@ void ALevelGenerator::Tick(float DeltaTime)
 
 void ALevelGenerator::Initialize(int32 seedInt)
 {
-	seed = FRandomStream(seedInt);
-	UE_LOG(LogTemp, Warning, TEXT("Initial seed: %i"), seed.GetInitialSeed())
+	Seed = FRandomStream(seedInt);
+	UE_LOG(LogTemp, Warning, TEXT("Initial seed: %i"), Seed.GetInitialSeed())
 	CheckSpawnRoom();
 }
 
@@ -204,9 +202,9 @@ void ALevelGenerator::CheckSpawnRoom()
 {
 	if (CurrentNodes < MaxNodes)
 	{
-		CurrentNodes++;
 		SpawnRoom(LevelPalette);
 		//if (bSpawnHallways) SpawnRoom(JoinPalette);
+		CurrentNodes++;
 	}
 	else if (!bSpawnedAI)
 	{
