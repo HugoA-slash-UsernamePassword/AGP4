@@ -79,7 +79,7 @@ void AEnemyCharacter::Tick(float DeltaTime)
 		DetectedActor = Superior->DetectedActor;
 	}
 
-	FindPath();
+	if (GetLocalRole() == ENetRole::ROLE_Authority) FindPath();
 
 
 	if (HealthComponent->CurrentHealth == 0)
@@ -263,7 +263,6 @@ void AEnemyCharacter::MoveAlongPath()
 
 void  AEnemyCharacter::FindPath()
 {
-	if (!(GetLocalRole() == ENetRole::ROLE_Authority)) return;
 	if (CurrentAgentState == AgentState::PATROL)
 	{
 		AgentPatrol();
