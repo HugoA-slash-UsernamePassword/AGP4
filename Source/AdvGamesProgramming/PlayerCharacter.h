@@ -26,6 +26,8 @@ protected:
 
 	UCameraComponent* Camera;
 
+	UHealthComponent* HealthComponent;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bCanDoubleJump;
 	float ForwardAxis;

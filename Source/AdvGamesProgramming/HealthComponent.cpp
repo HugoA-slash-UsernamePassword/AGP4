@@ -20,13 +20,6 @@ void UHealthComponent::BeginPlay()
 	Super::BeginPlay();
 
 	CurrentHealth = MaxHealth;
-
-	HealthComponent = FindComponentByClass<UHealthComponent>();
-
-	if (HealthComponent != nullptr)
-	{
-		HealthComponent->SetIsReplicated(true);
-	}
 	
 }
 
