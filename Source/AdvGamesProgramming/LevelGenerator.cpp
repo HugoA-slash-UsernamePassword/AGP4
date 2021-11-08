@@ -32,7 +32,6 @@ void ALevelGenerator::BeginPlay()
 void ALevelGenerator::SpawnRoom(TArray<TSubclassOf<ALevelData>> palette)
 {
 	if (palette.Num() == 0) { palette = LevelPalette; UE_LOG(LogTemp, Warning, TEXT("No valid palette selected; defaulting to LevelPalette.")) }
-
 	//DrawDebugPoint(GetWorld(), SpawnPoint.GetLocation(), 10.0f, FColor::Green, true); //Debug spawn point
 	TSubclassOf<ALevelData> LevelToSpawn;
 	if (RowNum == LastDisplaceNum && LastDisplaceNum != 0) {

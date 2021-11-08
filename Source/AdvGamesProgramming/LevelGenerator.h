@@ -54,13 +54,14 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-	UFUNCTION(BlueprintCallable)
-	void Initialize(int32 seedInt);
-	UFUNCTION(BlueprintCallable)
-	void CheckSpawnRoom();
+
 	//bool CheckNear(int i);
 
 public:	
+	UFUNCTION(BlueprintCallable)
+		void Initialize(int32 seedInt);
+	UFUNCTION(BlueprintCallable)
+		void CheckSpawnRoom();
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	void SpawnRoom(TArray<TSubclassOf<ALevelData>> palette);
