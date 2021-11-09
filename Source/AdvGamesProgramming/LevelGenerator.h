@@ -13,25 +13,26 @@ UCLASS()
 class ADVGAMESPROGRAMMING_API ALevelGenerator : public AActor
 {
 	GENERATED_BODY()
-	
-public:	
+
+public:
 	// Sets default values for this actor's properties
 	ALevelGenerator();
 	UPROPERTY(EditAnywhere)
-	int32 MaxNodes;
+		int32 MaxNodes;
 	int32 CurrentNodes;
 	UPROPERTY(EditAnywhere)
-	bool bSpawnHallways;
+		bool bSpawnHallways;
 	bool bSpawnedAI;
 
 	UPROPERTY(EditAnywhere)
-	TArray<TSubclassOf<ALevelData>> LevelPalette; //Array of level blueprints to be instantiated
+		TArray<TSubclassOf<ALevelData>> LevelPalette; //Array of level blueprints to be instantiated
 	UPROPERTY(EditAnywhere)
-	TArray<TSubclassOf<ALevelData>> JoinPalette; //Currently unused; Array of hallways to be instantiated between each level.
+		TArray<TSubclassOf<ALevelData>> JoinPalette; //Currently unused; Array of hallways to be instantiated between each level.
 	UPROPERTY(EditAnywhere)
-	FTransform SpawnPoint; //Position to spawn the next door. Also the position to spawn the first door.
+		FTransform SpawnPoint; //Position to spawn the next door. Also the position to spawn the first door.
 
 	TArray<USceneComponent*> nodes; //Temp
+	USceneComponent* respawnPoint; //Temp; used if the current room's respawn point cannot be found.
 	int RowNum;
 	float RowDisplace;
 	int LastRowNum;
@@ -39,15 +40,16 @@ public:
 	int LastDisplaceNum;
 
 	UPROPERTY(EditAnywhere)
-	UStaticMesh* doorway; //Doorway to add between rooms.
-	TArray<AActor*> rooms; //Currently unused; List of previous rooms to be used for debugging purposes
+		UStaticMesh* doorway; //Doorway to add between rooms.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		TArray<FVector> RespawnPoints;
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<ANavigationNode> NodeToSpawn; //Temp; Node to spawn. May be used by the new AI system.
+		TSubclassOf<ANavigationNode> NodeToSpawn; //Temp; Node to spawn. May be used by the new AI system.
 
 	ANavigationNode* lastNode; //The last navigation node spawned, so that the new room can connect to it.
 
 	UPROPERTY(EditAnywhere)
-	AAIManager* AIManager; //AIManager. Reference needed to setup navigation grid after all navigation nodes have been spawned.
+		AAIManager* AIManager; //AIManager. Reference needed to setup navigation grid after all navigation nodes have been spawned.
 
 	FRandomStream Seed;
 
@@ -57,7 +59,7 @@ protected:
 
 	//bool CheckNear(int i);
 
-public:	
+public:
 	UFUNCTION(BlueprintCallable)
 		void Initialize(int32 seedInt);
 	UFUNCTION(BlueprintCallable)

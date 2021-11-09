@@ -99,5 +99,6 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void BlueprintJump();
-
+	UFUNCTION(BlueprintImplementableEvent)
+		void OnDeath();
 };

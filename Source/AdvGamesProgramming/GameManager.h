@@ -30,6 +30,7 @@ public:
 	void EnemyDeath(AEnemyCharacter* Enemy);
 	UFUNCTION(BlueprintImplementableEvent)
 	void BPEnemyDeath();
+	UFUNCTION(BlueprintCallable)
 	void PlayerDeath(APlayerCharacter* Player);
 	UFUNCTION(BlueprintImplementableEvent)
 	void BPPlayerDeath();
