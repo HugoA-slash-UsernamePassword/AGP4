@@ -6,8 +6,6 @@
 // Sets default values
 AGameManager::AGameManager()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
 
 }
 
@@ -15,7 +13,6 @@ AGameManager::AGameManager()
 void AGameManager::BeginPlay()
 {
 	Super::BeginPlay();
-
 	if (GetLocalRole() != ENetRole::ROLE_Authority) Destroy();
 	
 }
@@ -37,7 +34,11 @@ void AGameManager::EnemyDeath(AEnemyCharacter* Enemy)
 
 		if (GEngine)
 			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("Player score is: %i"), Player->Score));
+
+		
 	}
+
+	UE_LOG(LogTemp, Warning, TEXT("ENEMY DIED"));
 }
 
 void AGameManager::PlayerDeath(APlayerCharacter* Player)

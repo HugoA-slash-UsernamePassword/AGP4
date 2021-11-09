@@ -36,7 +36,11 @@ void APlayerCharacter::BeginPlay()
 
 	for (TActorIterator<AGameManager> It(GetWorld()); It; ++It)
 	{
-		if (*It) GameManager->AllPlayers.Add(this);
+		if (*It)
+		{
+			GameManager = *It;
+			GameManager->AllPlayers.Add(this);
+		}
 	}
 
 }
