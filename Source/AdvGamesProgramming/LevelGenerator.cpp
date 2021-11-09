@@ -51,12 +51,10 @@ void ALevelGenerator::GenerateRoom(ALevelData* NewLevel)
 {
 	int diffRowNum = (RowNum + LastRowNum) * FMath::Sign(RowNum);
 	bool turnBack = RowNum == LastDisplaceNum && LastDisplaceNum != 999;
-	
 	NewLevel->GetComponents<USceneComponent>(nodes); //Get components
 	TArray<USceneComponent*> NavPoints; //Location to put navigation nodes
 	for (int32 i = nodes.Num() - 1; i >= 0; i--)
 	{
-		if (nodes[i]->ComponentHasTag("Respawn")) respawnPoint = nodes[i];
 		if (nodes[i]->ComponentHasTag("Nav")) NavPoints.Add(nodes[i]);
 		if (!nodes[i]->ComponentHasTag("Node"))	nodes.RemoveAt(i); //Remove from list if it is not a level node (doorway)
 	}
@@ -185,7 +183,7 @@ void ALevelGenerator::GenerateRoom(ALevelData* NewLevel)
 		NavPointsNode[chosenDoorInt]->ConnectedNodes.Add(lastNode);
 	}
 	lastNode = NavPointsNode[chosenDoorInt2];
-	if(respawnPoint) RespawnPoints.Add(respawnPoint->GetComponentLocation());
+	rooms.Add(NewLevel);
 }
 
 // Called every frame
@@ -200,8 +198,7 @@ void ALevelGenerator::Initialize(int32 seedInt)
 {
 	Seed = FRandomStream(seedInt);
 	UE_LOG(LogTemp, Warning, TEXT("Initial seed: %i"), Seed.GetInitialSeed())
-	SpawnRoom(LevelPalette[0]);
-	CurrentNodes++;
+	CheckSpawnRoom();
 }
 
 void ALevelGenerator::CheckSpawnRoom()

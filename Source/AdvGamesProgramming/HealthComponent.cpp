@@ -49,7 +49,6 @@ void UHealthComponent::OnTakeDamage(float Damage)
 	{
 		CurrentHealth = 0;
 		OnDeath();
-		CurrentHealth = MaxHealth;
 	}
 	
 }
@@ -58,11 +57,7 @@ void UHealthComponent::OnTakeDamage(float Damage)
 
 void UHealthComponent::OnDeath()
 {
-	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetOwner());
-	if (PlayerCharacter)
-	{
-		PlayerCharacter->OnDeath();
-	}
+
 }
 
 float UHealthComponent::HealthPercentageRemaining()
