@@ -3,21 +3,33 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Blueprint/UserWidget.h"
-#include "Runtime/CoreUObject/Public/UObject/ConstructorHelpers.h"
 #include "GameFramework/HUD.h"
 #include "PlayerHUD.generated.h"
 
 /**
- * 
+ *
  */
 UCLASS()
 class ADVGAMESPROGRAMMING_API APlayerHUD : public AHUD
 {
 	GENERATED_BODY()
-public:
-	APlayerHUD();
+
 private:
-	TSubclassOf<UUserWidget> PlayerHUDClass;
+
+	TSubclassOf<class UUserWidget> PlayerHUDClass;
 	UUserWidget* CurrentPlayerHUDWidget;
+	class UProgressBar* HealthProgressBar;
+	class UTextBlock* RoundsInMagazineText;
+	UTextBlock* RoundsRemainingText;
+
+public:
+
+	APlayerHUD();
+
+	void SetPlayerHealthBarPercent(float Percent);
+	void HideHUD();
+	void ShowHUD();
+	UFUNCTION(BlueprintCallable)
+		void SetAmmoText(int32 RoundsRemaining, int32 RoundsInMagazine);
+
 };
