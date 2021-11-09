@@ -79,6 +79,6 @@ void APlayerHUD::SetScore(int32 Score)
 {
 	if (ScoreText != nullptr)
 	{
-		ScoreText->SetText(FText::FromString(FString::Printf(TEXT("%i/%i"), Score)));
+		ScoreText->SetText(FText::FromString(FString::Printf(TEXT("Score: %i"), Score)));
 	}
 }

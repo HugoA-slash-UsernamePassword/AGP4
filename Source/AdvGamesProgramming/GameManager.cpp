@@ -29,6 +29,7 @@ void AGameManager::EnemyDeath(AEnemyCharacter* Enemy)
 	for (APlayerCharacter* Player : AllPlayers)
 	{
 		Player->Score += 5;
+		Player->UpdateHUD(Player->Score);
 
 		AllEnemies.Remove(Enemy);
 
@@ -43,12 +44,11 @@ void AGameManager::EnemyDeath(AEnemyCharacter* Enemy)
 
 void AGameManager::PlayerDeath(APlayerCharacter* Player)
 {
-	for (APlayerCharacter* Player : AllPlayers)
-	{
 		Player->Score -= 10;
+		Player->UpdateHUD(Player->Score);
+
 
 		if (GEngine)
 			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("Player score is: %i"), Player->Score));
-	}
 }
 

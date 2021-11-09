@@ -100,5 +100,7 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void BlueprintJump();
 	UFUNCTION(BlueprintImplementableEvent)
-		void OnDeath();
+		void OnDeath();	
+	UFUNCTION(BlueprintImplementableEvent)
+		void UpdateHUD(float _score);
 };
