@@ -33,6 +33,7 @@ APlayerHUD::APlayerHUD()
 	{
 		HealthProgressBar = Cast<UProgressBar>(CurrentPlayerHUDWidget->GetWidgetFromName(TEXT("ProgHealthBar")));
 		RoundsRemainingText = Cast<UTextBlock>(CurrentPlayerHUDWidget->GetWidgetFromName(TEXT("RoundsRemaining")));
+		ScoreText = Cast<UTextBlock>(CurrentPlayerHUDWidget->GetWidgetFromName(TEXT("ScoreText")));
 		//RoundsInMagazineText = Cast<UTextBlock>(CurrentPlayerHUDWidget->GetWidgetFromName(TEXT("RoundsInMagazine")));
 	}
 
@@ -71,6 +72,13 @@ void APlayerHUD::SetAmmoText(int32 RoundsRemaining, int32 RoundsInMagazine)
 	if (RoundsRemainingText != nullptr)
 	{
 		RoundsRemainingText->SetText(FText::FromString(FString::Printf(TEXT("%i/%i"), RoundsRemaining, RoundsInMagazine)));
-		//RoundsInMagazineText->SetText(FText::FromString(FString::Printf(TEXT("%i"), RoundsInMagazine)));
+	}
+}
+
+void APlayerHUD::SetScore(int32 Score)
+{
+	if (ScoreText != nullptr)
+	{
+		ScoreText->SetText(FText::FromString(FString::Printf(TEXT("%i/%i"), Score)));
 	}
 }
