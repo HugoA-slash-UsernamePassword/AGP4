@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "PlayerCharacter.h"
+#include "EnemyCharacter.h"
 #include "GameManager.generated.h"
 
 UCLASS()
@@ -14,6 +16,8 @@ class ADVGAMESPROGRAMMING_API AGameManager : public AActor
 public:	
 	// Sets default values for this actor's properties
 	AGameManager();
+	TArray < class AEnemyCharacter* > AllEnemies;
+	TArray < class APlayerCharacter* > AllPlayers;
 
 protected:
 	// Called when the game starts or when spawned
@@ -22,5 +26,12 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	void EnemyDeath(AEnemyCharacter* Enemy);
+	UFUNCTION(BlueprintImplementableEvent)
+	void BPEnemyDeath();
+	void PlayerDeath(APlayerCharacter* Player);
+	UFUNCTION(BlueprintImplementableEvent)
+	void BPPlayerDeath();
 
 };

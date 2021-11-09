@@ -8,6 +8,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "HealthComponent.h"
+#include "GameManager.h"
 #include "PlayerCharacter.generated.h"
 
 
@@ -28,6 +29,8 @@ protected:
 
 	UHealthComponent* HealthComponent;
 
+	class AGameManager* GameManager;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bCanDoubleJump;
 	float ForwardAxis;
@@ -46,6 +49,9 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	float SprintMultiplier;
+
+	UPROPERTY(Replicated)
+	int32 Score;
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
