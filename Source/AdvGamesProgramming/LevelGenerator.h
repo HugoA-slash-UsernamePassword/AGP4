@@ -32,6 +32,7 @@ public:
 	FTransform SpawnPoint; //Position to spawn the next door. Also the position to spawn the first door.
 
 	TArray<USceneComponent*> nodes; //Temp
+	USceneComponent* respawnPoint; //Temp; used if the current room's respawn point cannot be found.
 	int RowNum;
 	float RowDisplace;
 	int LastRowNum;
@@ -40,7 +41,8 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	UStaticMesh* doorway; //Doorway to add between rooms.
-	TArray<AActor*> rooms; //Currently unused; List of previous rooms to be used for debugging purposes
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<FVector> RespawnPoints;
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<ANavigationNode> NodeToSpawn; //Temp; Node to spawn. May be used by the new AI system.
 
