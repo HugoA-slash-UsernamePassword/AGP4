@@ -75,8 +75,11 @@ void ALevelGenerator::GenerateRoom(ALevelData* NewLevel)
 	int32 chosenDoorInt = validEntry[Seed.RandRange(0, validEntry.Num() - 1)]; //Random node from available nodes
 	//int32 chosenDoorInt = 2;
 	USceneComponent* chosenDoor = nodes[chosenDoorInt];
-	UStaticMeshComponent* _doorway = Cast<UStaticMeshComponent>(chosenDoor->GetChildComponent(0));
-	_doorway->SetStaticMesh(doorway); //Set doorway mesh
+	if (CurrentNodes != 0)
+	{
+		UStaticMeshComponent* _doorway = Cast<UStaticMeshComponent>(chosenDoor->GetChildComponent(0));
+		_doorway->SetStaticMesh(doorway); //Set doorway mesh
+	}
 
 	//Apply vectors
 	NewLevel->AddActorWorldRotation(chosenDoor->GetComponentRotation().GetInverse()); //Subtract component rotation (and base rotation)
@@ -154,9 +157,10 @@ void ALevelGenerator::GenerateRoom(ALevelData* NewLevel)
 	//UE_LOG(LogTemp, Warning, TEXT("Displacement: %i"), RowDisplace);
 
 
-
-	chosenDoor->GetChildComponent(0)->DestroyComponent(); //A doorway will be made on the other side.
-
+	if (CurrentNodes != MaxNodes - 1)
+	{
+		chosenDoor->GetChildComponent(0)->DestroyComponent(); //A doorway will be made on the other side.
+	}
 	SpawnPoint = chosenDoor->GetComponentTransform();
 	//UE_LOG(LogTemp, Warning, TEXT("Spawn degrees: %f"), SpawnPoint.GetRotation().GetAngle()); //debug angle, in case the room loops back on itself.
 
