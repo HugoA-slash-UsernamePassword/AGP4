@@ -15,6 +15,8 @@ AGameManager::AGameManager()
 void AGameManager::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (GetLocalRole() != ENetRole::ROLE_Authority) Destroy();
 	
 }
 
@@ -23,5 +25,29 @@ void AGameManager::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+}
+
+void AGameManager::EnemyDeath(AEnemyCharacter* Enemy)
+{
+	for (APlayerCharacter* Player : AllPlayers)
+	{
+		Player->Score += 5;
+
+		AllEnemies.Remove(Enemy);
+
+		if (GEngine)
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("Player score is: %i"), Player->Score));
+	}
+}
+
+void AGameManager::PlayerDeath(APlayerCharacter* Player)
+{
+	for (APlayerCharacter* Player : AllPlayers)
+	{
+		Player->Score -= 10;
+
+		if (GEngine)
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("Player score is: %i"), Player->Score));
+	}
 }
 

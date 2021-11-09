@@ -54,6 +54,11 @@ void AEnemyCharacter::BeginPlay()
 
 	PathfindingNodeAccuracy = PathfindingDestinationAccuracy;
 
+	for (TActorIterator<AGameManager> It(GetWorld()); It; ++It)
+	{
+		if (*It) GameManager->AllEnemies.Add(this);
+	}
+
 }
 
 // Called every frame
@@ -86,6 +91,7 @@ void AEnemyCharacter::Tick(float DeltaTime)
 	{
 		if (Inferior)Inferior->Superior = Superior;
 		if (Superior)Superior->Inferior = Inferior;
+		if (GameManager) GameManager->EnemyDeath(this);
 		Destroy();
 	}
 

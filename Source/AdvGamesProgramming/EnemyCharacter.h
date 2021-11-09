@@ -6,6 +6,8 @@
 #include "GameFramework/Character.h"
 #include "Perception/AIPerceptionTypes.h"
 #include "HealthComponent.h"
+#include "GameManager.h"
+#include "EngineUtils.h"
 #include "EnemyCharacter.generated.h"
 
 UENUM()
@@ -25,6 +27,8 @@ public:
 	// Sets default values for this character's properties
 	AEnemyCharacter();
 	AEnemyCharacter(AEnemyCharacter* SuperiorAI);
+
+	class AGameManager* GameManager;
 
 protected:
 	// Called when the game starts or when spawned

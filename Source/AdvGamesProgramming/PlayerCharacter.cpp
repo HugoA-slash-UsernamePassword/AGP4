@@ -34,6 +34,11 @@ void APlayerCharacter::BeginPlay()
 		HealthComponent->SetIsReplicated(true);
 	}
 
+	for (TActorIterator<AGameManager> It(GetWorld()); It; ++It)
+	{
+		if (*It) GameManager->AllPlayers.Add(this);
+	}
+
 }
 
 // Called every frame
@@ -41,6 +46,12 @@ void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+}
+
+void APlayerCharacter::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(APlayerCharacter, Score);
 }
 
 // Called to bind functionality to input
