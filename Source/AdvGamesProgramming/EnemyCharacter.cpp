@@ -60,50 +60,46 @@ void AEnemyCharacter::BeginPlay()
 void AEnemyCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	if (GetLocalRole() == ENetRole::ROLE_Authority)
+	if (Superior && HealthComponent->CurrentHealth > 40.0f)
 	{
-		
-		if (Superior && HealthComponent->CurrentHealth > 40.0f)
+		if (bCanSeeActor && !Superior->bCanSeeActor)
 		{
-			if (bCanSeeActor && !Superior->bCanSeeActor)
-			{
-				Superior->DetectedActor = DetectedActor;
-				Superior->Path.Empty();
-				Superior->AgentEngage();
-				Superior->CurrentAgentState = AgentState::ENGAGE;
+			Superior->DetectedActor = DetectedActor;
+			Superior->Path.Empty();
+			Superior->AgentEngage();
+			Superior->CurrentAgentState = AgentState::ENGAGE;
 
-				Path.Empty();
-				AgentEngage();
+			Path.Empty();
+			AgentEngage();
 
-				UE_LOG(LogTemp, Warning, TEXT("PLAYER SPOTTED"));
-			}
-
-			CurrentAgentState = Superior->CurrentAgentState;
-			DetectedActor = Superior->DetectedActor;
+			UE_LOG(LogTemp, Warning, TEXT("PLAYER SPOTTED"));
 		}
 
-		FindPath();
-
-
-		if (HealthComponent->CurrentHealth == 0)
-		{
-			if (Inferior)Inferior->Superior = Superior;
-			if (Superior)Superior->Inferior = Inferior;
-			Destroy();
-		}
-
-		if (TravelTimer > 0) TravelTimer -= DeltaTime;
-
-		if (LastNode)
-		{
-			if ((GetActorLocation() - LastNode->GetActorLocation()).SizeSquared() > 100)
-			{
-				LastNode->bIsOccupied = false;
-			}
-		}
-
-		MoveAlongPath();
+		CurrentAgentState = Superior->CurrentAgentState;
+		DetectedActor = Superior->DetectedActor;
 	}
+
+	FindPath();
+
+
+	if (HealthComponent->CurrentHealth == 0)
+	{
+		if (Inferior)Inferior->Superior = Superior;
+		if (Superior)Superior->Inferior = Inferior;
+		Destroy();
+	}
+
+	if (TravelTimer > 0) TravelTimer -= DeltaTime;
+
+	if (LastNode)
+	{
+		if ((GetActorLocation() - LastNode->GetActorLocation()).SizeSquared() > 100)
+		{
+			LastNode->bIsOccupied = false;
+		}
+	}
+
+	MoveAlongPath();
 }
 
 // Called to bind functionality to input
@@ -267,6 +263,7 @@ void AEnemyCharacter::MoveAlongPath()
 
 void  AEnemyCharacter::FindPath()
 {
+	if (!(GetLocalRole() == ENetRole::ROLE_Authority)) return;
 	if (CurrentAgentState == AgentState::PATROL)
 	{
 		AgentPatrol();
