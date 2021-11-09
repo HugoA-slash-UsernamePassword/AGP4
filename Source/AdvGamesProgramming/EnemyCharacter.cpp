@@ -60,46 +60,50 @@ void AEnemyCharacter::BeginPlay()
 void AEnemyCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	if (Superior && HealthComponent->CurrentHealth > 40.0f)
+	if (GetLocalRole() == ENetRole::ROLE_Authority)
 	{
-		if (bCanSeeActor && !Superior->bCanSeeActor)
+		
+		if (Superior && HealthComponent->CurrentHealth > 40.0f)
 		{
-			Superior->DetectedActor = DetectedActor;
-			Superior->Path.Empty();
-			Superior->AgentEngage();
-			Superior->CurrentAgentState = AgentState::ENGAGE;
+			if (bCanSeeActor && !Superior->bCanSeeActor)
+			{
+				Superior->DetectedActor = DetectedActor;
+				Superior->Path.Empty();
+				Superior->AgentEngage();
+				Superior->CurrentAgentState = AgentState::ENGAGE;
 
-			Path.Empty();
-			AgentEngage();
+				Path.Empty();
+				AgentEngage();
 
-			UE_LOG(LogTemp, Warning, TEXT("PLAYER SPOTTED"));
+				UE_LOG(LogTemp, Warning, TEXT("PLAYER SPOTTED"));
+			}
+
+			CurrentAgentState = Superior->CurrentAgentState;
+			DetectedActor = Superior->DetectedActor;
 		}
 
-		CurrentAgentState = Superior->CurrentAgentState;
-		DetectedActor = Superior->DetectedActor;
-	}
-
-	if (GetLocalRole() == ENetRole::ROLE_Authority) FindPath();
+		FindPath();
 
 
-	if (HealthComponent->CurrentHealth == 0)
-	{
-		if (Inferior)Inferior->Superior = Superior;
-		if (Superior)Superior->Inferior = Inferior;
-		Destroy();
-	}
-
-	if (TravelTimer > 0) TravelTimer -= DeltaTime;
-
-	if (LastNode)
-	{
-		if ((GetActorLocation() - LastNode->GetActorLocation()).SizeSquared() > 100)
+		if (HealthComponent->CurrentHealth == 0)
 		{
-			LastNode->bIsOccupied = false;
+			if (Inferior)Inferior->Superior = Superior;
+			if (Superior)Superior->Inferior = Inferior;
+			Destroy();
 		}
-	}
 
-	MoveAlongPath();
+		if (TravelTimer > 0) TravelTimer -= DeltaTime;
+
+		if (LastNode)
+		{
+			if ((GetActorLocation() - LastNode->GetActorLocation()).SizeSquared() > 100)
+			{
+				LastNode->bIsOccupied = false;
+			}
+		}
+
+		MoveAlongPath();
+	}
 }
 
 // Called to bind functionality to input
