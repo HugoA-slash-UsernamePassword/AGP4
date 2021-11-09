@@ -123,7 +123,7 @@ void ALevelGenerator::GenerateRoom(ALevelData* NewLevel)
 			}
 		}
 	}
-	if (validDoors.Num() == 0) { NewLevel->Destroy(); UE_LOG(LogTemp, Error, TEXT("No valid exit found")) return; }
+	if (validDoors.Num() == 0) { NewLevel->Destroy(); CurrentNodes--; UE_LOG(LogTemp, Error, TEXT("No valid exit found")) return; }
 	int32 chosenDoorInt2 = validDoors[Seed.RandRange(0, validDoors.Num() - 1)];
 	chosenDoor = nodes[chosenDoorInt2];
 	float doorAngle = chosenDoor->GetComponentRotation().Quaternion().Z;
