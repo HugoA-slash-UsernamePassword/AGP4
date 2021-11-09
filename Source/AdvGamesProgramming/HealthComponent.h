@@ -18,6 +18,10 @@ public:
 	// Sets default values for this component's properties
 	UHealthComponent();
 
+private:
+	UFUNCTION()
+	void UpdateHealthBar();
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -26,7 +30,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
 		float MaxHealth;
-	UPROPERTY(Replicated, BlueprintReadOnly)
+	UPROPERTY(ReplicatedUsing = UpdateHealthBar, BlueprintReadOnly)
 		float CurrentHealth;
 
 	// Called every frame
