@@ -164,7 +164,7 @@ void AEnemyCharacter::AgentEvade()
 	if (bCanSeeActor && DetectedActor)
 	{
 		FVector FireDirection = DetectedActor->GetActorLocation() - GetActorLocation();
-		Fire(FireDirection, (600 - (DetectedActor->GetVelocity().Size() + 300)) / 900);
+		Fire(FireDirection, (700 - (DetectedActor->GetVelocity().Size() + 300)) / 900);
 	}
 	if (Path.Num() == 0 && DetectedActor)
 	{
