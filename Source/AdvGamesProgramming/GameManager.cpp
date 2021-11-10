@@ -36,7 +36,7 @@ void AGameManager::EnemyDeath(AEnemyCharacter* Enemy)
 		AllEnemies.Remove(Enemy);
 
 		if (GEngine)
-			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("Player score is: %i"), Player->Score));
+			//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("Player score is: %i"), Player->Score));
 
 		
 	}
@@ -53,7 +53,7 @@ void AGameManager::PlayerDeath(APlayerCharacter* _Player)
 
 
 		if (GEngine)
-			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("Player score is: %i"), Player->Score));
+			//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("Player score is: %i"), Player->Score));
 	}
 }
 
