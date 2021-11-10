@@ -6,22 +6,24 @@
 // Sets default values
 AGameManager::AGameManager()
 {
-
+	PrimaryActorTick.bCanEverTick = true;
 }
 
 // Called when the game starts or when spawned
 void AGameManager::BeginPlay()
 {
 	Super::BeginPlay();
-	if (GetLocalRole() != ENetRole::ROLE_Authority) Destroy();
-	
+	//if (GetLocalRole() != ENetRole::ROLE_Authority) Destroy();
 }
 
 // Called every frame
 void AGameManager::Tick(float DeltaTime)
 {
+	for (APlayerCharacter* Player : AllPlayers)
+	{
+		Player->UpdateHUD(Player->Score);
+	}
 	Super::Tick(DeltaTime);
-
 }
 
 void AGameManager::EnemyDeath(AEnemyCharacter* Enemy)

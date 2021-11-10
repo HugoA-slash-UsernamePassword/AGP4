@@ -45,6 +45,7 @@ void UHealthComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 void UHealthComponent::OnTakeDamage(float Damage)
 {
 	CurrentHealth -= Damage;
+	UpdateHealthBar();
 	if (CurrentHealth < 0.0f)
 	{
 		CurrentHealth = 0;
@@ -72,7 +73,7 @@ float UHealthComponent::HealthPercentageRemaining()
 
 void UHealthComponent::UpdateHealthBar()
 {
-	if (GetOwner()->GetLocalRole() == ROLE_AutonomousProxy)
+	//if (GetOwner()->GetLocalRole() == ROLE_AutonomousProxy)
 	{
 		APlayerHUD* PlayerHUD = Cast<APlayerHUD>(UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetHUD());
 		if (PlayerHUD)
