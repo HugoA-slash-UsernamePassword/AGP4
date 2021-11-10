@@ -83,7 +83,7 @@ public:
 	void SensePlayer(AActor* ActorSensed, FAIStimulus Stimulus);
 
 	UFUNCTION(BlueprintImplementableEvent)
-	void Fire(FVector FireDirection);
+	void Fire(FVector FireDirection, float AccuracyReduction);
 
 	void FindPath();
 	bool bIsStuck;
