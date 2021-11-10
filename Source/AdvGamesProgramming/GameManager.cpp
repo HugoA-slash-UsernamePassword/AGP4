@@ -42,13 +42,16 @@ void AGameManager::EnemyDeath(AEnemyCharacter* Enemy)
 	UE_LOG(LogTemp, Warning, TEXT("ENEMY DIED"));
 }
 
-void AGameManager::PlayerDeath(APlayerCharacter* Player)
+void AGameManager::PlayerDeath(APlayerCharacter* _Player)
 {
+	for (APlayerCharacter* Player : AllPlayers)
+	{
 		Player->Score -= 10;
 		Player->UpdateHUD(Player->Score);
 
 
 		if (GEngine)
 			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("Player score is: %i"), Player->Score));
+	}
 }
 
