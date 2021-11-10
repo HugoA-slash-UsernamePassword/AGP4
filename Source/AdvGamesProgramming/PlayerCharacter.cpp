@@ -54,7 +54,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 void APlayerCharacter::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	DOREPLIFETIME(APlayerCharacter, Score);
+	DOREPLIFETIME(APlayerCharacter, Score); // Setting score to be replicated
 }
 
 // Called to bind functionality to input
@@ -162,7 +162,7 @@ void APlayerCharacter::Landed(const FHitResult& Hit) {
 }
 
 void APlayerCharacter::Jump() {
-	Super::Jump();
+	Super::Jump(); //Overriding Jump to launch player if they can double jump and are not grounded
 	if (GetMovementComponent()->IsFalling() && bCanDoubleJump) {
 		ACharacter::LaunchCharacter(FVector(0, 0, 500), false, true);
 		bCanDoubleJump = false;
@@ -172,11 +172,13 @@ void APlayerCharacter::Jump() {
 void APlayerCharacter::Reload()
 {
 	BlueprintReload();
+	//Blueprint event for reloading
 }
 
 void APlayerCharacter::StartJump()
 {
 	BlueprintJump();
+	//Blueprint event for jumping
 }
 
 
